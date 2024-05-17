@@ -14,6 +14,7 @@ Use `python logger.py` to run the app.
 
 ## What it does
 
+### At this time this app doesnt support Bungeecord so don't try to import Bungeecord log files
 This app is intented to create a simple activity viewer to Minecraft Velocity based proxys
 
 You can get player activity by timestamp within a IP address and a username.
