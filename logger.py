@@ -14,4 +14,4 @@ if __name__ == "__main__":
 
         config: dict[str, str] = LOAD_CONFIG(CONFIG_FILE)
         db = GET_DATABASE(config["mongodb_connection_string"])
-        CREATE_GUI(db)
+        CREATE_GUI(db, config)

@@ -1,11 +1,11 @@
 import tkinter as tk
 from tkinter import ttk
 from pymongo.database import Database
-from thread.import_thread import IMPORT_THREAD
+from multiprocess.import_process import IMPORT_PROCESS
 from file.select_folder import SELECT_IMPORT_FOLDER
 
 
-def IMPORT(root: tk.Tk, db: Database):
+def IMPORT(root: tk.Tk, db: Database, config: dict[str, str]):
     # Crear ventana secundaria
     importar_window = tk.Toplevel(root)
     importar_window.title("Importar Logs")
@@ -54,7 +54,7 @@ def IMPORT(root: tk.Tk, db: Database):
     iniciar_button = ttk.Button(
         frame_importar,
         text="Iniciar Importación",
-        command=lambda: IMPORT_THREAD(
+        command=lambda: IMPORT_PROCESS(
             db,
             carpeta_entry_var,
             proxy_type_var,
@@ -62,6 +62,7 @@ def IMPORT(root: tk.Tk, db: Database):
             importar_window,
             iniciar_button,
             carpeta_button,
+            config,
         ),
     )
     iniciar_button.grid(row=5, column=0, columnspan=2, padx=5, pady=5, sticky="e")

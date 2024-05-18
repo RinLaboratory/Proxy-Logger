@@ -5,7 +5,7 @@ from database.search_from_database import SEARCH
 from gui.import_dialog import IMPORT
 
 
-def CREATE_GUI(db: Database):
+def CREATE_GUI(db: Database, config: dict[str, str]):
     # Crear ventana principal
     root = tk.Tk()
     root.title("Interfaz de Usuario")
@@ -32,7 +32,7 @@ def CREATE_GUI(db: Database):
     )
     button_buscar.grid(row=1, column=1, padx=5, pady=5)
     button_importar = ttk.Button(
-        frame_principal, text="Importar", command=lambda: IMPORT(root, db)
+        frame_principal, text="Importar", command=lambda: IMPORT(root, db, config)
     )
     button_importar.grid(row=1, column=2, padx=5, pady=5)
 

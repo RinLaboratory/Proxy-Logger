@@ -1,28 +1,27 @@
 import hashlib
-import tkinter as tk
-from tkinter import ttk
-from queue import Queue
-from tkinter import messagebox
+import multiprocessing
 from utils.search import SEARCH_HASH
 from file.read_file import READ_FILE
 from pymongo.database import Database
+from database.get_database import GET_DATABASE
 from database.write_player_to_database import WRITE_PLAYER_TO_DATABASE
 
 
 def IMPORT_FROM_FILES(
-    db: Database,
+    config: dict[str, str],
     list_logs_files: list[str],
     proxy_type: str,
     directory: str,
-    progress_queue: Queue,
+    progress_queue: multiprocessing.Queue,
     loadedPlayers: list[tuple[str, int]],
     loadedIPs: list[tuple[str, int]],
     loadedPlayerIPs: list[tuple[int, int]],
     loadedHashes: list[tuple[str, str, int]],
     queue_number: int,
 ):
+    db = GET_DATABASE(config["mongodb_connection_string"])
     for index, log_file in enumerate(list_logs_files):
-        print("[Queue " + str(queue_number) + "] " + log_file)
+        # print("[Queue " + str(queue_number) + "] " + log_file)
         file_lines = READ_FILE(directory + "\\" + log_file)
 
         # Hashear el archivo para ver su registro
@@ -54,5 +53,4 @@ def IMPORT_FROM_FILES(
                 )
         else:
             print("skipped file " + log_file + " as it was already loaded.")
-        progress = ((index + 1) * 100) // len(list_logs_files)
-        progress_queue.put(progress)
+        progress_queue.put(1)
