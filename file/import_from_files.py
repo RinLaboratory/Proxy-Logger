@@ -35,22 +35,25 @@ def IMPORT_FROM_FILES(
         # cuando es ==-1 significa que el hash no está presente.
         # Lo ideal es ignorar los archivos llamados latest.log porque todavia no
         # se manejan bien.
-        if file_isPresent == -1 and file_name != "latest.log":
-            log_file_result = db["file"].insert_one(
-                {"filename": log_file, "proxy_type": proxy_type, "hash": file_hash}
-            )
-            log_file_id = log_file_result.inserted_id
-
-            for merged_line in file_lines:
-                WRITE_PLAYER_TO_DATABASE(
-                    db,
-                    merged_line,
-                    log_file,
-                    log_file_id,
-                    loadedPlayers,
-                    loadedIPs,
-                    loadedPlayerIPs,
+        if file_name != "latest.log":
+            if file_isPresent == -1:
+                log_file_result = db["file"].insert_one(
+                    {"filename": log_file, "proxy_type": proxy_type, "hash": file_hash}
                 )
+                log_file_id = log_file_result.inserted_id
+
+                for merged_line in file_lines:
+                    WRITE_PLAYER_TO_DATABASE(
+                        db,
+                        merged_line,
+                        log_file,
+                        log_file_id,
+                        loadedPlayers,
+                        loadedIPs,
+                        loadedPlayerIPs,
+                    )
+            else:
+                print("skipped file " + log_file + " as it was already loaded.")
         else:
-            print("skipped file " + log_file + " as it was already loaded.")
+            print("ignored latest.log")
         progress_queue.put(1)
