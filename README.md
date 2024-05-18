@@ -2,9 +2,15 @@
 
 ## Project Info
 
-This project uses Python `v3.11.3`, SQLite, Tkinter, hashlib, os, threading, re and datetime.
+This project uses Python `v3.11.3`, MongoDB, Tkinter, hashlib, os, threading, re and datetime.
 
 Until now `17-05-2024` all this packages are integrated within python.
+
+## Install dependencies
+
+Run `pip install pymongo httpx httpcore`
+
+Make sure that u have `pymongo`, `httpx` and `httpcore` updated. otherwise it will throw a weird error saying they're incompatible with each other.
 
 ## How to run
 
@@ -31,9 +37,3 @@ If you use [nLogin](https://en.docs.nickuc.com/) this will append the player act
 This is important within the logs as it marks when the actual player session starts
 
 All the information thats returned its ordered by timestamp (date and hour) so no need to worry about importing order between outdated logs and most recent ones.
-
-## Important notice
-
-SQLite was chosen because it is portable.
-
-Unfortunately it's very slow, so expect long waiting times when importing A LOT of log files, specially those ones who are very LONG (30k lines).
