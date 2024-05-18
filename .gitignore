@@ -167,3 +167,6 @@ cython_debug/
 
 # backup files
 *.bak
+
+# config files
+config.json
