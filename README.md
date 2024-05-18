@@ -2,7 +2,7 @@
 
 ## Project Info
 
-This project uses Python `v3.11.3`, MongoDB, Tkinter, hashlib, os, threading, re and datetime.
+This project uses Python `v3.11.3`, MongoDB, Tkinter, hashlib, os, threading, multiprocessing, re and datetime.
 
 Until now `17-05-2024` all this packages are integrated within python.
 
@@ -15,6 +15,9 @@ Make sure that u have `pymongo`, `httpx` and `httpcore` updated. otherwise it wi
 ## How to run
 
 As stated above, you need [python `v3.11.3`](https://www.python.org/downloads/release/python-3113/) installed.
+
+### I suggest closing very demanding apps when importing logs as it will use almost ALL of your computer resources.
+(your total available threads in your core - 1)
 
 Use `python logger.py` to run the app.
 
