@@ -72,7 +72,7 @@ def SEARCH(
             player_related_ips.append(player_data["player_id"])
 
         # Buscar las coincidencias en las ips relacionadas con el jugador
-        playername_query = db["player"].find_one({"_id": {"$in": player_related_ips}})
+        playername_query = db["player"].find({"_id": {"$in": player_related_ips}})
 
         # Buscar la actividad de los jugadores
         activity_query = (
