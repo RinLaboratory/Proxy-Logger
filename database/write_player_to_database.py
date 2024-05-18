@@ -135,3 +135,4 @@ def WRITE_PLAYER_TO_DATABASE(
     except Exception as e:
         print(f"Error processing line: {line}")
         print(e)
+        print(f"Ignoring invalid line.")
