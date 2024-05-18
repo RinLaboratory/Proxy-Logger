@@ -1,16 +1,16 @@
 import os
 import threading
 import tkinter as tk
-from queue import Queue, Empty
+import multiprocessing
 from tkinter import ttk
 from pymongo.database import Database
 from tkinter import messagebox
 from file.import_from_files import IMPORT_FROM_FILES
-from thread.wait_for_threads import WAIT_FOR_THREADS
+from multiprocess.wait_for_process import WAIT_FOR_PROCESS
 from database.load_database import LOAD_DATABASE_BEFORE_NEW_IMPORT
 
 
-def IMPORT_THREAD(
+def IMPORT_PROCESS(
     db: Database,
     carpeta_entry_var: tk.StringVar,
     proxy_type_var: tk.StringVar,
@@ -18,8 +18,8 @@ def IMPORT_THREAD(
     importar_window: tk.Toplevel,
     iniciar_button: ttk.Button,
     carpeta_button: ttk.Button,
+    config: dict[str, str],
 ):
-    queue = Queue()
     loadedPlayers: list[tuple[str, int]] = []
     loadedIPs: list[tuple[str, int]] = []
     loadedPlayerIPs: list[tuple[int, int]] = []
@@ -49,30 +49,34 @@ def IMPORT_THREAD(
     list_logs_files = os.listdir(carpeta)
 
     total_files = len(list_logs_files)
-    num_threads = 3
 
-    # Lista para almacenar los threads
-    threads: list[threading.Thread] = []
+    # Dejamos que la cpu respire con 1 core.
+    num_process: int = os.cpu_count() - 1
 
-    # Crear tres colas para el progreso, una por cada hilo
-    progress_queues: list[Queue] = [queue for _ in range(num_threads)]
+    # Lista para almacenar los procesos
+    process: list[multiprocessing.Process] = []
 
-    # Calcula cuántos archivos leerá cada thread
-    files_per_thread = total_files // num_threads
+    # Crear colas para el progreso, una por cada proceso
+    progress_queues: list[multiprocessing.Queue] = [
+        multiprocessing.Queue() for _ in range(num_process)
+    ]
 
-    # Crear y comenzar 3 threads
-    for i in range(num_threads):
-        start_index = i * files_per_thread
+    # Calcula cuántos archivos leerá cada process
+    files_per_process = total_files // num_process
+
+    # Crear y comenzar los procesos
+    for i in range(num_process):
+        start_index = i * files_per_process
         end_index = (
-            start_index + files_per_thread if i < num_threads - 1 else total_files
+            start_index + files_per_process if i < num_process - 1 else total_files
         )
-        thread_files = list_logs_files[start_index:end_index]
+        process_files = list_logs_files[start_index:end_index]
 
-        import_thread = threading.Thread(
+        import_process = multiprocessing.Process(
             target=IMPORT_FROM_FILES,
             args=(
-                db,
-                thread_files,
+                config,
+                process_files,
                 proxy_type,
                 carpeta,
                 progress_queues[i],
@@ -83,19 +87,20 @@ def IMPORT_THREAD(
                 i,
             ),
         )
-        threads.append(import_thread)
-        import_thread.start()
+        process.append(import_process)
+        import_process.start()
 
-    # iniciar cuarto thread para actualizar la info de la gui sin atascarse
+    # iniciar thread para actualizar la info de la gui sin atascarse
     wait_for_threads = threading.Thread(
-        target=WAIT_FOR_THREADS,
+        target=WAIT_FOR_PROCESS,
         args=(
-            threads,
+            process,
             progress_queues,
             progress_var,
             importar_window,
             iniciar_button,
             carpeta_button,
+            total_files,
         ),
     )
     wait_for_threads.start()
