@@ -1,11 +1,17 @@
-import sqlite3
+import os
 from gui.logger_dialog import CREATE_GUI
-from database.create_database import CREATE_DATABASE_TABLES
+from config.save_config import CONFIG_FILE
+from gui.ask_database_details_dialog import ASK_DATABASE_DETAILS_DIALOG
+from config.load_config import LOAD_CONFIG
+from database.get_database import GET_DATABASE
 
-con = sqlite3.connect("tutorial.db")
-cur = con.cursor()
 
-CREATE_DATABASE_TABLES(cur)
-CREATE_GUI(cur)
+if __name__ == "__main__":
+    if not os.path.exists(CONFIG_FILE):
+        ASK_DATABASE_DETAILS_DIALOG()
+    else:
+        print("El archivo de configuración ya existe.")
 
-con.close()
+        config: dict[str, str] = LOAD_CONFIG(CONFIG_FILE)
+        db = GET_DATABASE(config["mongodb_connection_string"])
+        CREATE_GUI(db)

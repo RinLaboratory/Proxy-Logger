@@ -1,11 +1,10 @@
-import sqlite3
 import re as regex
 from tkinter import ttk
-from datetime import datetime
+from pymongo.database import Database
 
 
 def SEARCH(
-    cur: sqlite3.Cursor,
+    db: Database,
     entry_input: ttk.Entry,
     tree_logs: ttk.Treeview,
     tree_dupeip: ttk.Treeview,
@@ -26,58 +25,72 @@ def SEARCH(
     if regex.match(patron_ip, search_bar_text) is None:
         # El regex es un nombre de usuario
         # Ejecutar la query
-        query_log: list[tuple[datetime, str, str, str, int]] = cur.execute(
-            "SELECT activity.timestamp, activity.text, ip_address.ip, player.playername, activity.id AS activity_id \
-                                FROM activity \
-                                INNER JOIN player ON activity.player_id = player.id \
-                                LEFT JOIN player_ip ON player.id = player_ip.player_id \
-                                LEFT JOIN ip_address ON player_ip.ip_id = ip_address.id \
-                                WHERE player.playername = ? \
-                                ORDER BY datetime(activity.timestamp, 'localtime')",
-            (search_bar_text,),
-        ).fetchall()
 
-        ips: list[str] = []
-        activity: list[int] = []
+        # Buscar por jugador
+        playername_query = db["player"].find_one({"playername": search_bar_text})
         tree_alts.insert("", "end", values=(str(search_bar_text)))
-        # Mostrar resultados en la tabla de logs relacionados
-        for timestamp, log_activity, ip, playername, activity_id in query_log:
-            if activity_id and activity_id not in activity:
-                tree_logs.insert(
-                    "",
-                    "end",
-                    values=(str(timestamp), str(log_activity).replace("\n", " ")),
-                )
-                activity.append(activity_id)
-            if ip and ip not in ips:
-                tree_dupeip.insert("", "end", values=(str(ip)))
-                ips.append(ip)
+
+        # Buscar la actividad del jugador
+        activity_query = (
+            db["activity"]
+            .find({"player_id": playername_query["_id"]})
+            .sort("timestamp")
+        )
+
+        # Buscar las ips relacionadas con el jugador
+        player_related_ips: list[str] = []
+        player_ip_query = db["player_ip"].find({"player_id": playername_query["_id"]})
+        for player_ip in player_ip_query:
+            player_related_ips.append(player_ip["ip_id"])
+
+        # Buscar las coincidencias en las ips relacionadas con el jugador
+        ip_query = db["ip_address"].find({"_id": {"$in": player_related_ips}})
+
+        # Poblar la tabla
+        for ip in ip_query:
+            tree_dupeip.insert("", "end", values=(str(ip["ip"])))
+
+        for activity in activity_query:
+            tree_logs.insert(
+                "",
+                "end",
+                values=(
+                    str(activity["timestamp"]),
+                    str(activity["text"]).replace("\n", " "),
+                ),
+            )
+
     else:
-        # El regex es una IP
-        # Ejecutar la query
-        query_log: list[tuple[datetime, str, str, str, int]] = cur.execute(
-            "SELECT activity.timestamp, activity.text, ip_address.ip, player.playername, activity.id AS activity_id \
-                                FROM activity \
-                                INNER JOIN player ON activity.player_id = player.id \
-                                LEFT JOIN player_ip ON player.id = player_ip.player_id \
-                                LEFT JOIN ip_address ON player_ip.ip_id = ip_address.id \
-                                WHERE ip_address.ip = ? \
-                                ORDER BY datetime(activity.timestamp, 'localtime')",
-            (search_bar_text,),
-        ).fetchall()
-
-        player: list[str] = []
-        activity: list[int] = []
+        # Buscar por ip
+        ip_query = db["ip_address"].find_one({"ip": search_bar_text})
         tree_alts.insert("", "end", values=(str(search_bar_text)))
-        # Mostrar resultados en la tabla de logs relacionados
-        for timestamp, log_activity, ip, playername, activity_id in query_log:
-            if activity_id and activity_id not in activity:
-                tree_logs.insert(
-                    "",
-                    "end",
-                    values=(str(timestamp), str(log_activity).replace("\n", " ")),
-                )
-                activity.append(activity_id)
-            if playername and playername not in player:
-                tree_dupeip.insert("", "end", values=(str(playername)))
-                player.append(playername)
+
+        # Buscar los jugadores relacionados con la ip
+        player_related_ips: list[str] = []
+        player_data_query = db["player_ip"].find({"ip_id": ip_query["_id"]})
+        for player_data in player_data_query:
+            player_related_ips.append(player_data["player_id"])
+
+        # Buscar las coincidencias en las ips relacionadas con el jugador
+        playername_query = db["player"].find_one({"_id": {"$in": player_related_ips}})
+
+        # Buscar la actividad de los jugadores
+        activity_query = (
+            db["activity"]
+            .find({"player_id": {"$in": player_related_ips}})
+            .sort("timestamp")
+        )
+
+        # Poblar la tabla
+        for playername in playername_query:
+            tree_dupeip.insert("", "end", values=(str(playername["playername"])))
+
+        for activity in activity_query:
+            tree_logs.insert(
+                "",
+                "end",
+                values=(
+                    str(activity["timestamp"]),
+                    str(activity["text"]).replace("\n", " "),
+                ),
+            )

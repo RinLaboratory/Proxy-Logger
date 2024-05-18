@@ -1,6 +1,7 @@
 import re as regex
 from datetime import datetime
 
+
 # Función para obtener la fecha y hora de una línea de log
 def GET_LOG_DATEHOURS(line: str, log_filename: str):
     hour_pattern = r"\[(\d+:\d+:\d+)\]"

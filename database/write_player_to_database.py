@@ -1,13 +1,12 @@
-import sqlite3
+from pymongo.database import Database
 from log_processing.get_log_hours import GET_LOG_DATEHOURS
-from utils.search import SEARCH_IP, SEARCH_IP_ID, SEARCH_PLAYER
 
 
 def WRITE_PLAYER_TO_DATABASE(
+    db: Database,
     line: str,
     log_filename: str,
     log_file_id: int,
-    cur_thread: sqlite3.Cursor,
     loadedPlayers: list[tuple[str, int]],
     loadedIPs: list[tuple[str, int]],
     loadedPlayerIPs: list[tuple[int, int]],
@@ -20,114 +19,119 @@ def WRITE_PLAYER_TO_DATABASE(
             ip_and_port: list[str] = splited_line[
                 splited_line.index("player]") + 2
             ].split("/")
-            splited_ip = ip_and_port[1].split(":")
-            ip = splited_ip[0]
-            # print(playername + ' | ' + ip)
-            inserted_ip_address_id = 0
-            inserted_playername_id = 0
+            ip = ip_and_port[1].split(":")[0]
 
-            ip_address_isPresent = SEARCH_IP(ip, loadedIPs)
-            playername_isPresent = SEARCH_PLAYER(playername, loadedPlayers)
-
-            if ip_address_isPresent != -1:
-                # print(ip_address_isPresent)
-                inserted_ip_address_id = loadedIPs[ip_address_isPresent][1]
-            else:
-                cur_thread.execute(
-                    "INSERT INTO ip_address(ip,id) VALUES ('" + str(ip) + "', NULL)"
-                )
-                loadedIPs.append([ip, cur_thread.lastrowid])
-                inserted_ip_address_id = cur_thread.lastrowid
-
-            if playername_isPresent != -1:
-                inserted_playername_id = loadedPlayers[playername_isPresent][1]
-
-            else:
-                cur_thread.execute(
-                    "INSERT INTO player(playername,id) VALUES ('"
-                    + str(playername)
-                    + "', NULL)"
-                )
-                loadedPlayers.append([playername, cur_thread.lastrowid])
-                inserted_playername_id = cur_thread.lastrowid
-
-            cur_thread.execute(
-                "INSERT INTO activity(text, player_id, timestamp, file_id, id) VALUES (?, ?, ?, ?, NULL)",
-                ("".join(line), inserted_playername_id, log_datetime, log_file_id),
+            # Using dictionaries for faster lookups
+            loadedIPs_dict = {ip: id for ip, id in loadedIPs}
+            loadedPlayers_dict = {player: id for player, id in loadedPlayers}
+            loadedPlayerIPs_set = set(
+                (player_id, ip_id) for player_id, ip_id in loadedPlayerIPs
             )
 
-            player_ip_address_isPresent = SEARCH_IP_ID(
-                inserted_playername_id, inserted_ip_address_id, loadedPlayerIPs
+            inserted_ip_address_id = ""
+            inserted_playername_id = ""
+
+            ip_address_isPresent = loadedIPs_dict.get(ip)
+            playername_isPresent = loadedPlayers_dict.get(playername)
+
+            if ip_address_isPresent is not None:
+                inserted_ip_address_id = ip_address_isPresent
+            else:
+                inserted_ip_address_result = db["ip_address"].insert_one(
+                    {"ip": str(ip)}
+                )
+                inserted_ip_address_id = inserted_ip_address_result.inserted_id
+                loadedIPs.append([ip, inserted_ip_address_id])
+
+            if playername_isPresent is not None:
+                inserted_playername_id = playername_isPresent
+            else:
+                inserted_playername_result = db["player"].insert_one(
+                    {"playername": str(playername)}
+                )
+                inserted_playername_id = inserted_playername_result.inserted_id
+                loadedPlayers.append([playername, inserted_playername_id])
+
+            db["activity"].insert_one(
+                {
+                    "text": "".join(line),
+                    "player_id": inserted_playername_id,
+                    "timestamp": log_datetime,
+                    "file_id": log_file_id,
+                }
             )
-            if player_ip_address_isPresent == -1:
-                cur_thread.execute(
-                    "INSERT INTO player_ip(player_id, ip_id) VALUES (?, ?)",
-                    (inserted_playername_id, inserted_ip_address_id),
+
+            if (
+                inserted_playername_id,
+                inserted_ip_address_id,
+            ) not in loadedPlayerIPs_set:
+                db["player_ip"].insert_one(
+                    {
+                        "player_id": inserted_playername_id,
+                        "ip_id": inserted_ip_address_id,
+                    }
                 )
                 loadedPlayerIPs.append([inserted_playername_id, inserted_ip_address_id])
 
-        if (line.startswith("[") and "[server connection]") in line:
+        elif (line.startswith("[") and "[server connection]") in line:
             log_datetime = GET_LOG_DATEHOURS(line, log_filename)
             splited_line = line.split()
             playername = splited_line[splited_line.index("connection]") + 1]
 
             inserted_playername_id = 0
 
-            playername_isPresent = SEARCH_PLAYER(playername, loadedPlayers)
+            loadedPlayers_dict = {player: id for player, id in loadedPlayers}
+            playername_isPresent = loadedPlayers_dict.get(playername)
 
-            if playername_isPresent != -1:
-                inserted_playername_id = loadedPlayers[playername_isPresent][1]
-
+            if playername_isPresent is not None:
+                inserted_playername_id = playername_isPresent
             else:
-                cur_thread.execute(
-                    "INSERT INTO player(playername,id) VALUES ('"
-                    + str(playername)
-                    + "', NULL)"
+                inserted_playername_result = db["player"].insert_one(
+                    {"playername": str(playername)}
                 )
-                loadedPlayers.append([playername, cur_thread.lastrowid])
-                inserted_playername_id = cur_thread.lastrowid
+                inserted_playername_id = inserted_playername_result.inserted_id
+                loadedPlayers.append([playername, inserted_playername_id])
 
-            cur_thread.execute(
-                "INSERT INTO activity(text, player_id, timestamp, file_id, id) VALUES (?, ?, ?, ?, NULL)",
-                ("".join(line), inserted_playername_id, log_datetime, log_file_id),
+            db["activity"].insert_one(
+                {
+                    "text": "".join(line),
+                    "player_id": inserted_playername_id,
+                    "timestamp": log_datetime,
+                    "file_id": log_file_id,
+                }
             )
 
-        if line.startswith("[") and "[nlogin]" in line:
-            if ("has successfully logged in." in line) or (
-                "has successfully registered." in line
+        elif line.startswith("[") and "[nlogin]" in line:
+            if (
+                "has successfully logged in." in line
+                or "has successfully registered." in line
             ):
                 log_datetime = GET_LOG_DATEHOURS(line, log_filename)
                 splited_line = line.split()
                 playername = splited_line[splited_line.index("user") + 1]
-                playername_isPresent = SEARCH_PLAYER(playername, loadedPlayers)
-                if playername_isPresent != -1:
-                    inserted_playername_id = loadedPlayers[playername_isPresent][1]
-                    cur_thread.execute(
-                        "INSERT INTO activity(text, player_id, timestamp, file_id, id) VALUES (?, ?, ?, ?, NULL)",
-                        (
-                            "".join(line),
-                            inserted_playername_id,
-                            log_datetime,
-                            log_file_id,
-                        ),
-                    )
+
+                loadedPlayers_dict = {player: id for player, id in loadedPlayers}
+                playername_isPresent = loadedPlayers_dict.get(playername)
+                inserted_playername_id = ""
+
+                if playername_isPresent is not None:
+                    inserted_playername_id = playername_isPresent
                 else:
-                    cur_thread.execute(
-                        "INSERT INTO player(playername,id) VALUES ('"
-                        + str(playername)
-                        + "', NULL)"
+                    inserted_playername_result = db["player"].insert_one(
+                        {"playername": str(playername)}
                     )
-                    loadedPlayers.append([playername, cur_thread.lastrowid])
-                    inserted_playername_id = cur_thread.lastrowid
-                    cur_thread.execute(
-                        "INSERT INTO activity(text, player_id, timestamp, file_id, id) VALUES (?, ?, ?, ?, NULL)",
-                        (
-                            "".join(line),
-                            inserted_playername_id,
-                            log_datetime,
-                            log_file_id,
-                        ),
-                    )
+                    inserted_playername_id = inserted_playername_result.inserted_id
+                    loadedPlayers.append([playername, inserted_playername_id])
+
+                db["activity"].insert_one(
+                    {
+                        "text": "".join(line),
+                        "player_id": inserted_playername_id,
+                        "timestamp": log_datetime,
+                        "file_id": log_file_id,
+                    }
+                )
+
     except Exception as e:
-        # print('ignored invalid line. |'+line)
+        print(f"Error processing line: {line}")
         print(e)

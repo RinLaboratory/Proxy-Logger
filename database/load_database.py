@@ -1,35 +1,25 @@
-import sqlite3
+from pymongo.database import Database
 
 
 def LOAD_DATABASE_BEFORE_NEW_IMPORT(
-    cur: sqlite3.Cursor,
+    db: Database,
     loadedPlayers: list[tuple[str, int]],
     loadedIPs: list[tuple[str, int]],
     loadedPlayerIPs: list[tuple[int, int]],
     loadedHashes: list[tuple[str, str, int]],
 ):
-    playername_query: list[tuple[str, int]] = cur.execute(
-        "SELECT playername, id FROM player"
-    ).fetchall()
-    for playername, id in playername_query:
-        loadedPlayers.append([playername, id])
+    playername_query = db["player"].find()
+    for playername in playername_query:
+        loadedPlayers.append([playername["playername"], playername["_id"]])
 
-    ip_query: list[tuple[str, int]] = cur.execute(
-        "SELECT ip, id FROM ip_address"
-    ).fetchall()
-    for ip, id in ip_query:
-        loadedIPs.append([ip, id])
+    ip_query = db["ip_address"].find()
+    for ip in ip_query:
+        loadedIPs.append([ip["ip"], ip["_id"]])
 
-    player_query: list[tuple[int, int]] = cur.execute(
-        "SELECT player_id, ip_id FROM player_ip"
-    ).fetchall()
-    for player_element, ip_id in player_query:
-        loadedPlayerIPs.append([player_element, ip_id])
+    player_query = db["player_ip"].find()
+    for player in player_query:
+        loadedPlayerIPs.append([player["player_id"], player["ip_id"]])
 
-    file_hash: list[tuple[str, str, int]] = cur.execute(
-        "SELECT hash, filename, id FROM file"
-    ).fetchall()
-    for hash, filename, id in file_hash:
-        loadedHashes.append([hash, filename, id])
-
-    # print(loadedPlayers)
+    file_hash = db["file"].find()
+    for file in file_hash:
+        loadedHashes.append([file["hash"], file["filename"], file["_id"]])

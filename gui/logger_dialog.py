@@ -1,11 +1,11 @@
-import sqlite3
 import tkinter as tk
 from tkinter import ttk
+from pymongo.database import Database
 from database.search_from_database import SEARCH
 from gui.import_dialog import IMPORT
 
 
-def CREATE_GUI(cur: sqlite3.Cursor):
+def CREATE_GUI(db: Database):
     # Crear ventana principal
     root = tk.Tk()
     root.title("Interfaz de Usuario")
@@ -28,11 +28,11 @@ def CREATE_GUI(cur: sqlite3.Cursor):
     button_buscar = ttk.Button(
         frame_principal,
         text="Buscar",
-        command=lambda: SEARCH(cur, entry_input, tree_logs, tree_dupeip, tree_alts),
+        command=lambda: SEARCH(db, entry_input, tree_logs, tree_dupeip, tree_alts),
     )
     button_buscar.grid(row=1, column=1, padx=5, pady=5)
     button_importar = ttk.Button(
-        frame_principal, text="Importar", command=lambda: IMPORT(root, cur)
+        frame_principal, text="Importar", command=lambda: IMPORT(root, db)
     )
     button_importar.grid(row=1, column=2, padx=5, pady=5)
 
