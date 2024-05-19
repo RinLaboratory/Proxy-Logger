@@ -5,7 +5,10 @@ from multiprocess.import_process import IMPORT_PROCESS
 from file.select_folder import SELECT_IMPORT_FOLDER
 
 
-def IMPORT(root: tk.Tk, db: Database, config: dict[str, str]):
+def IMPORT(
+    root: tk.Tk,
+    config: dict[str, str],
+):
     # Crear ventana secundaria
     importar_window = tk.Toplevel(root)
     importar_window.title("Importar Logs")
@@ -55,7 +58,6 @@ def IMPORT(root: tk.Tk, db: Database, config: dict[str, str]):
         frame_importar,
         text="Iniciar Importación",
         command=lambda: IMPORT_PROCESS(
-            db,
             carpeta_entry_var,
             proxy_type_var,
             progress_var,

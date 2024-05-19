@@ -3,15 +3,12 @@ import threading
 import tkinter as tk
 import multiprocessing
 from tkinter import ttk
-from pymongo.database import Database
 from tkinter import messagebox
 from file.import_from_files import IMPORT_FROM_FILES
 from multiprocess.wait_for_process import WAIT_FOR_PROCESS
-from database.load_database import LOAD_DATABASE_BEFORE_NEW_IMPORT
 
 
 def IMPORT_PROCESS(
-    db: Database,
     carpeta_entry_var: tk.StringVar,
     proxy_type_var: tk.StringVar,
     progress_var: tk.DoubleVar,
@@ -20,11 +17,6 @@ def IMPORT_PROCESS(
     carpeta_button: ttk.Button,
     config: dict[str, str],
 ):
-    loadedPlayers: list[tuple[str, int]] = []
-    loadedIPs: list[tuple[str, int]] = []
-    loadedPlayerIPs: list[tuple[int, int]] = []
-    loadedHashes: list[tuple[str, str, int]] = []
-
     # Deshabilitar botones
     iniciar_button.config(state="disabled")
     carpeta_button.config(state="disabled")
@@ -43,14 +35,12 @@ def IMPORT_PROCESS(
         f"Iniciando importación desde {carpeta} con tipo {proxy_type}.",
     )
 
-    LOAD_DATABASE_BEFORE_NEW_IMPORT(
-        db, loadedPlayers, loadedIPs, loadedPlayerIPs, loadedHashes
-    )
     list_logs_files = os.listdir(carpeta)
 
     total_files = len(list_logs_files)
 
-    # Dejamos que la cpu respire con 1 core.
+    # Dejamos que la cpu respire con 1 core para maximizar el rendimiento.
+    # Sin matar a la pc
     num_process: int = os.cpu_count() - 1
 
     # Lista para almacenar los procesos
@@ -80,11 +70,6 @@ def IMPORT_PROCESS(
                 proxy_type,
                 carpeta,
                 progress_queues[i],
-                loadedPlayers,
-                loadedIPs,
-                loadedPlayerIPs,
-                loadedHashes,
-                i,
             ),
         )
         process.append(import_process)
