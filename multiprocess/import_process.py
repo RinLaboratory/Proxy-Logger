@@ -4,8 +4,11 @@ import tkinter as tk
 import multiprocessing
 from tkinter import ttk
 from tkinter import messagebox
+from utils.types import TypesConfig
+from utils.types import TypesLoadedData
 from file.import_from_files import IMPORT_FROM_FILES
 from multiprocess.wait_for_process import WAIT_FOR_PROCESS
+from database.load_database import LOAD_DATABASE_BEFORE_NEW_IMPORT
 
 
 def IMPORT_PROCESS(
@@ -15,8 +18,15 @@ def IMPORT_PROCESS(
     importar_window: tk.Toplevel,
     iniciar_button: ttk.Button,
     carpeta_button: ttk.Button,
-    config: dict[str, str],
+    config: TypesConfig,
 ):
+    loadedData: TypesLoadedData = {
+        "player": [],
+        "ip_address": [],
+        "player_ip": [],
+        "file": [],
+    }
+
     # Deshabilitar botones
     iniciar_button.config(state="disabled")
     carpeta_button.config(state="disabled")
@@ -34,6 +44,9 @@ def IMPORT_PROCESS(
         "Importar",
         f"Iniciando importación desde {carpeta} con tipo {proxy_type}.",
     )
+
+    print("Cargando db...")
+    LOAD_DATABASE_BEFORE_NEW_IMPORT(config, loadedData)
 
     list_logs_files = os.listdir(carpeta)
 
@@ -55,6 +68,7 @@ def IMPORT_PROCESS(
     files_per_process = total_files // num_process
 
     # Crear y comenzar los procesos
+    print("Comenzando procesos...")
     for i in range(num_process):
         start_index = i * files_per_process
         end_index = (
@@ -65,11 +79,11 @@ def IMPORT_PROCESS(
         import_process = multiprocessing.Process(
             target=IMPORT_FROM_FILES,
             args=(
-                config,
                 process_files,
                 proxy_type,
                 carpeta,
                 progress_queues[i],
+                loadedData,
             ),
         )
         process.append(import_process)
@@ -79,6 +93,7 @@ def IMPORT_PROCESS(
     wait_for_threads = threading.Thread(
         target=WAIT_FOR_PROCESS,
         args=(
+            config,
             process,
             progress_queues,
             progress_var,

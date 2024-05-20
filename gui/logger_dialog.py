@@ -1,13 +1,14 @@
 import tkinter as tk
 from tkinter import ttk
+from utils.types import TypesConfig
+from gui.import_dialog import IMPORT
 from pymongo.database import Database
 from database.search_from_database import SEARCH
-from gui.import_dialog import IMPORT
 
 
 def CREATE_GUI(
     db: Database,
-    config: dict[str, str],
+    config: TypesConfig,
 ):
     # Crear ventana principal
     root = tk.Tk()

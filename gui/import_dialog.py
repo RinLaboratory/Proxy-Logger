@@ -1,13 +1,13 @@
 import tkinter as tk
 from tkinter import ttk
-from pymongo.database import Database
+from utils.types import TypesConfig
 from multiprocess.import_process import IMPORT_PROCESS
 from file.select_folder import SELECT_IMPORT_FOLDER
 
 
 def IMPORT(
     root: tk.Tk,
-    config: dict[str, str],
+    config: TypesConfig,
 ):
     # Crear ventana secundaria
     importar_window = tk.Toplevel(root)
