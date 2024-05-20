@@ -1,12 +1,15 @@
-from pymongo.database import Database
+from bson import objectid
+from utils.types import TypesLoadedData, TypesInsertedData
 from log_processing.get_log_hours import GET_LOG_DATEHOURS
+from utils.search import SEARCH_IP, SEARCH_IP_ID, SEARCH_PLAYER
 
 
 def WRITE_PLAYER_TO_DATABASE(
-    db: Database,
     line: str,
     log_filename: str,
-    log_file_id: int,
+    log_file_id: objectid.ObjectId,
+    insertData: TypesInsertedData,
+    loadedData: TypesLoadedData,
 ):
     try:
         if line.startswith("[") and ("[connected player]" in line):
@@ -18,81 +21,94 @@ def WRITE_PLAYER_TO_DATABASE(
             ].split("/")
             ip = ip_and_port[1].split(":")[0]
 
-            inserted_ip_address_id = ""
-            inserted_playername_id = ""
+            inserted_ip_address_id: objectid.ObjectId = ""
+            inserted_playername_id: objectid.ObjectId = ""
 
-            ip_address_isPresent = db["ip_address"].update_one(
-                {"ip": ip}, {"$set": {"ip": ip}}, upsert=True
-            )
+            ip_address_isPresent = SEARCH_IP(ip, loadedData["ip_address"])
+            playername_isPresent = SEARCH_PLAYER(playername, loadedData["player"])
 
-            playername_isPresent = db["player"].update_one(
-                {"playername": playername},
-                {"$set": {"playername": playername}},
-                upsert=True,
-            )
-
-            if ip_address_isPresent.upserted_id is not None:
-                # La ip es nueva y no está en la db
-                inserted_ip_address_id = ip_address_isPresent.upserted_id
-            else:
-                # La ip está y se actualizó en la db
-                inserted_ip_address_id = db["ip_address"].find_one({"ip": str(ip)})[
+            if ip_address_isPresent != -1:
+                # La ip está presente desde antes
+                inserted_ip_address_id = loadedData["ip_address"][ip_address_isPresent][
                     "_id"
                 ]
-
-            if playername_isPresent.upserted_id is not None:
-                inserted_playername_id = playername_isPresent.upserted_id
             else:
-                inserted_playername_id = db["player"].find_one(
-                    {"playername": str(playername)}
-                )["_id"]
+                # La ip no está presente y se debe ingresar en la db
+                # Creación del objeto
+                inserted_ip_address_id = objectid.ObjectId()
+                insertData["ip_address"].append(
+                    {
+                        "_id": inserted_ip_address_id,
+                        "ip": ip,
+                    }
+                )
 
-            db["activity"].insert_one(
+            if playername_isPresent != -1:
+                # El jugador está presente desde antes
+                inserted_playername_id = loadedData["player"][playername_isPresent][
+                    "_id"
+                ]
+            else:
+                # El jugador no está presente y se debe ingresar en la db
+                # Creación del objeto
+                inserted_playername_id = objectid.ObjectId()
+                insertData["player"].append(
+                    {"_id": inserted_playername_id, "playername": playername}
+                )
+
+            insertData["activity"].append(
                 {
-                    "text": "".join(line),
-                    "player_id": inserted_playername_id,
-                    "timestamp": log_datetime,
+                    "_id": objectid.ObjectId(),
                     "file_id": log_file_id,
+                    "player_id": inserted_playername_id,
+                    "text": "".join(line),
+                    "timestamp": log_datetime,
                 }
             )
 
-            db["player_ip"].update_one(
-                {"player_id": inserted_playername_id, "ip_id": inserted_ip_address_id},
-                {
-                    "$set": {
-                        "player_id": inserted_playername_id,
-                        "ip_id": inserted_ip_address_id,
-                    }
-                },
-                upsert=True,
+            player_ip_isPresent = SEARCH_IP_ID(
+                inserted_playername_id, inserted_ip_address_id, loadedData["player_ip"]
             )
+
+            if player_ip_isPresent == -1:
+                # No está presente
+                insertData["player_ip"].append(
+                    {
+                        "_id": objectid.ObjectId(),
+                        "ip_id": inserted_ip_address_id,
+                        "player_id": inserted_playername_id,
+                    }
+                )
 
         elif line.startswith("[") and ("[server connection]" in line):
             log_datetime = GET_LOG_DATEHOURS(line, log_filename)
             splited_line = line.split()
             playername = splited_line[splited_line.index("connection]") + 1]
 
-            inserted_playername_id = ""
+            inserted_playername_id: objectid.ObjectId = ""
 
-            playername_isPresent = db["player"].update_one(
-                {"playername": playername},
-                {"$set": {"playername": playername}},
-                upsert=True,
-            )
+            playername_isPresent = SEARCH_PLAYER(playername, loadedData["player"])
 
-            if playername_isPresent.upserted_id is not None:
-                inserted_playername_id = playername_isPresent.upserted_id
+            if playername_isPresent != -1:
+                # El jugador está presente desde antes
+                inserted_playername_id = loadedData["player"][playername_isPresent][
+                    "_id"
+                ]
             else:
-                inserted_playername_id = db["player"].find_one(
-                    {"playername": str(playername)}
-                )["_id"]
+                # El jugador no está presente y se debe ingresar en la db
+                # Creación del objeto
+                inserted_playername_id = objectid.ObjectId()
+                insertData["player"].append(
+                    {"_id": inserted_playername_id, "playername": playername}
+                )
 
-            db["activity"].insert_one(
+            insertData["activity"].append(
                 {
-                    "text": "".join(line),
-                    "player_id": inserted_playername_id,
-                    "timestamp": log_datetime,
+                    "_id": objectid.ObjectId(),
                     "file_id": log_file_id,
+                    "player_id": inserted_playername_id,
+                    "text": "".join(line),
+                    "timestamp": log_datetime,
                 }
             )
 
@@ -105,26 +121,29 @@ def WRITE_PLAYER_TO_DATABASE(
                 splited_line = line.split()
                 playername = splited_line[splited_line.index("user") + 1]
 
-                inserted_playername_id = ""
-                playername_isPresent = db["player"].update_one(
-                    {"playername": playername},
-                    {"$set": {"playername": playername}},
-                    upsert=True,
-                )
+                inserted_playername_id: objectid.ObjectId = ""
+                playername_isPresent = SEARCH_PLAYER(playername, loadedData["player"])
 
-                if playername_isPresent.upserted_id is not None:
-                    inserted_playername_id = playername_isPresent.upserted_id
+                if playername_isPresent != -1:
+                    # El jugador está presente desde antes
+                    inserted_playername_id = loadedData["player"][playername_isPresent][
+                        "_id"
+                    ]
                 else:
-                    inserted_playername_id = db["player"].find_one(
-                        {"playername": str(playername)}
-                    )["_id"]
+                    # El jugador no está presente y se debe ingresar en la db
+                    # Creación del objeto
+                    inserted_playername_id = objectid.ObjectId()
+                    insertData["player"].append(
+                        {"_id": inserted_playername_id, "playername": playername}
+                    )
 
-                db["activity"].insert_one(
+                insertData["activity"].append(
                     {
-                        "text": "".join(line),
-                        "player_id": inserted_playername_id,
-                        "timestamp": log_datetime,
+                        "_id": objectid.ObjectId(),
                         "file_id": log_file_id,
+                        "player_id": inserted_playername_id,
+                        "text": "".join(line),
+                        "timestamp": log_datetime,
                     }
                 )
 
