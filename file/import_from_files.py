@@ -4,6 +4,7 @@ from bson import objectid
 from file.read_file import READ_FILE
 from utils.types import TypesLoadedData, TypesInsertedData
 from log_processing.process_log_data_velocity import PROCESS_LOG_DATA_VELOCITY
+from log_processing.process_log_data_bungeecord import PROCESS_LOG_DATA_BUNGEECORD
 
 
 def IMPORT_FROM_FILES(
@@ -58,7 +59,7 @@ def IMPORT_FROM_FILES(
                             loadedData,
                         )
                     else:
-                        PROCESS_LOG_DATA_VELOCITY(
+                        PROCESS_LOG_DATA_BUNGEECORD(
                             merged_line,
                             log_file,
                             log_file_id,
