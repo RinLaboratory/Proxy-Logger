@@ -39,10 +39,12 @@ class TypesMongoActivity(TypedDict):
 
 
 class TypesLoadedData(TypedDict):
-    player: list[TypesMongoPlayer]
-    ip_address: list[TypesMongoIpAddress]
-    player_ip: list[TypesMongoPlayerIp]
-    file: list[TypesMongoFile]
+    player: dict[str, tuple[str, ObjectId]]
+    player_as_id: dict[ObjectId, tuple[str, ObjectId]]
+    ip_address: dict[str, tuple[str, ObjectId]]
+    ip_address_as_id: dict[ObjectId, tuple[str, ObjectId]]
+    player_ip: set[tuple[ObjectId, ObjectId]]
+    file: dict[str, tuple[str, str]]
 
 
 class TypesInsertedData(TypedDict):

@@ -3,7 +3,7 @@ import multiprocessing
 from tkinter import ttk
 from queue import Queue, Empty
 from tkinter import messagebox
-from utils.types import TypesInsertedData, TypesConfig
+from utils.types import TypesInsertedData, TypesConfig, TypesLoadedData
 from database.get_database import GET_DATABASE
 from log_processing.processInsertData import PROCESS_INSERT_DATA
 
@@ -17,6 +17,7 @@ def WAIT_FOR_PROCESS(
     iniciar_button: ttk.Button,
     carpeta_button: ttk.Button,
     total_files: int,  # Número total de archivos a procesar
+    loadedData: TypesLoadedData,
 ):
     # Total de archivos procesados por todos los procesos
     total_processed_files = 0
@@ -77,16 +78,37 @@ def WAIT_FOR_PROCESS(
         p.join()
 
     print("procesando...")
-    processedInsertData = PROCESS_INSERT_DATA(unprocessedInsertData)
+    processedInsertData = PROCESS_INSERT_DATA(unprocessedInsertData, loadedData)
 
     db = GET_DATABASE(config["mongodb_connection_string"])
 
     print("insertando en mongo...")
-    db["player"].insert_many(processedInsertData["player"], ordered=False)
-    db["ip_address"].insert_many(processedInsertData["ip_address"], ordered=False)
-    db["player_ip"].insert_many(processedInsertData["player_ip"], ordered=False)
-    db["file"].insert_many(processedInsertData["file"], ordered=False)
-    db["activity"].insert_many(processedInsertData["activity"], ordered=False)
+    if len(processedInsertData["player"]) > 0:
+        db["player"].insert_many(processedInsertData["player"], ordered=False)
+    else:
+        print("ignored insert_many in player collection as processed data it was empty")
+    if len(processedInsertData["ip_address"]) > 0:
+        db["ip_address"].insert_many(processedInsertData["ip_address"], ordered=False)
+    else:
+        print(
+            "ignored insert_many in ip_address collection as processed data it was empty"
+        )
+    if len(processedInsertData["player_ip"]) > 0:
+        db["player_ip"].insert_many(processedInsertData["player_ip"], ordered=False)
+    else:
+        print(
+            "ignored insert_many in player_ip collection as processed data it was empty"
+        )
+    if len(processedInsertData["file"]) > 0:
+        db["file"].insert_many(processedInsertData["file"], ordered=False)
+    else:
+        print("ignored insert_many in file collection as processed data it was empty")
+    if len(processedInsertData["activity"]) > 0:
+        db["activity"].insert_many(processedInsertData["activity"], ordered=False)
+    else:
+        print(
+            "ignored insert_many in activity collection as processed data it was empty"
+        )
 
     # Rehabilitar botones
     iniciar_button.config(state="normal")

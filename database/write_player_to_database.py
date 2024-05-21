@@ -1,7 +1,6 @@
 from bson import objectid
 from utils.types import TypesLoadedData, TypesInsertedData
 from log_processing.get_log_hours import GET_LOG_DATEHOURS
-from utils.search import SEARCH_IP, SEARCH_IP_ID, SEARCH_PLAYER
 
 
 def WRITE_PLAYER_TO_DATABASE(
@@ -24,14 +23,12 @@ def WRITE_PLAYER_TO_DATABASE(
             inserted_ip_address_id: objectid.ObjectId = ""
             inserted_playername_id: objectid.ObjectId = ""
 
-            ip_address_isPresent = SEARCH_IP(ip, loadedData["ip_address"])
-            playername_isPresent = SEARCH_PLAYER(playername, loadedData["player"])
+            ip_address_isPresent = loadedData["ip_address"].get(ip)
+            playername_isPresent = loadedData["player"].get(playername)
 
-            if ip_address_isPresent != -1:
+            if ip_address_isPresent is not None:
                 # La ip está presente desde antes
-                inserted_ip_address_id = loadedData["ip_address"][ip_address_isPresent][
-                    "_id"
-                ]
+                inserted_ip_address_id = ip_address_isPresent[1]
             else:
                 # La ip no está presente y se debe ingresar en la db
                 # Creación del objeto
@@ -43,11 +40,9 @@ def WRITE_PLAYER_TO_DATABASE(
                     }
                 )
 
-            if playername_isPresent != -1:
+            if playername_isPresent is not None:
                 # El jugador está presente desde antes
-                inserted_playername_id = loadedData["player"][playername_isPresent][
-                    "_id"
-                ]
+                inserted_playername_id = playername_isPresent[1]
             else:
                 # El jugador no está presente y se debe ingresar en la db
                 # Creación del objeto
@@ -66,9 +61,11 @@ def WRITE_PLAYER_TO_DATABASE(
                 }
             )
 
-            player_ip_isPresent = SEARCH_IP_ID(
-                inserted_playername_id, inserted_ip_address_id, loadedData["player_ip"]
-            )
+            player_ip_isPresent = -1
+            if (inserted_ip_address_id, inserted_playername_id) in loadedData[
+                "player_ip"
+            ]:
+                player_ip_isPresent = 1
 
             if player_ip_isPresent == -1:
                 # No está presente
@@ -87,13 +84,11 @@ def WRITE_PLAYER_TO_DATABASE(
 
             inserted_playername_id: objectid.ObjectId = ""
 
-            playername_isPresent = SEARCH_PLAYER(playername, loadedData["player"])
+            playername_isPresent = loadedData["player"].get(playername)
 
-            if playername_isPresent != -1:
+            if playername_isPresent is not None:
                 # El jugador está presente desde antes
-                inserted_playername_id = loadedData["player"][playername_isPresent][
-                    "_id"
-                ]
+                inserted_playername_id = playername_isPresent[1]
             else:
                 # El jugador no está presente y se debe ingresar en la db
                 # Creación del objeto
@@ -122,13 +117,11 @@ def WRITE_PLAYER_TO_DATABASE(
                 playername = splited_line[splited_line.index("user") + 1]
 
                 inserted_playername_id: objectid.ObjectId = ""
-                playername_isPresent = SEARCH_PLAYER(playername, loadedData["player"])
+                playername_isPresent = loadedData["player"].get(playername)
 
-                if playername_isPresent != -1:
+                if playername_isPresent is not None:
                     # El jugador está presente desde antes
-                    inserted_playername_id = loadedData["player"][playername_isPresent][
-                        "_id"
-                    ]
+                    inserted_playername_id = playername_isPresent[1]
                 else:
                     # El jugador no está presente y se debe ingresar en la db
                     # Creación del objeto

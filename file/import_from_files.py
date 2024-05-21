@@ -2,7 +2,6 @@ import hashlib
 import multiprocessing
 from bson import objectid
 from file.read_file import READ_FILE
-from utils.search import SEARCH_HASH
 from utils.types import TypesLoadedData, TypesInsertedData
 from database.write_player_to_database import WRITE_PLAYER_TO_DATABASE
 
@@ -31,13 +30,13 @@ def IMPORT_FROM_FILES(
         hash_obj.update(str(file_lines).encode())
         file_hash = str(hash_obj.hexdigest())
 
-        # cuando es ==-1 significa que el hash no está presente.
+        # cuando es == None significa que el hash no está presente.
         # Lo ideal es ignorar los archivos llamados latest.log porque todavia no
         # se manejan bien.
-        fileIsLoaded = SEARCH_HASH(file_hash, loadedData["file"])
+        fileIsLoaded = loadedData["file"].get(file_hash)
 
         if log_file != "latest.log":
-            if fileIsLoaded == -1:
+            if fileIsLoaded is None:
                 # Creación del objeto
                 log_file_id = objectid.ObjectId()
                 insertData["file"].append(

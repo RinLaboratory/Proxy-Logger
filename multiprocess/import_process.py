@@ -21,10 +21,12 @@ def IMPORT_PROCESS(
     config: TypesConfig,
 ):
     loadedData: TypesLoadedData = {
-        "player": [],
-        "ip_address": [],
-        "player_ip": [],
-        "file": [],
+        "player": {},
+        "player_as_id": {},
+        "ip_address": {},
+        "ip_address_as_id": {},
+        "player_ip": {},
+        "file": {},
     }
 
     # Deshabilitar botones
@@ -101,6 +103,7 @@ def IMPORT_PROCESS(
             iniciar_button,
             carpeta_button,
             total_files,
+            loadedData,
         ),
     )
     wait_for_threads.start()
