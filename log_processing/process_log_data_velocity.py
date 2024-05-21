@@ -111,6 +111,7 @@ def PROCESS_LOG_DATA_VELOCITY(
             if (
                 "has successfully logged in." in line
                 or "has successfully registered." in line
+                or "logged in automatically" in line
             ):
                 log_datetime = GET_LOG_DATEHOURS(line, log_filename)
                 splited_line = line.split()
