@@ -7,7 +7,7 @@ from config.save_config import SAVE_CONFIG
 
 
 def CHECK_CONNECTION_DATABASE(connection_string: str):
-    """Intenta conectarse a MongoDB y retorna True si la conexión es exitosa, de lo contrario False."""
+    # Intenta conectarse a MongoDB y retorna True si la conexión es exitosa, de lo contrario False.
     try:
         client = MongoClient(connection_string, serverSelectionTimeoutMS=2000)
         client.server_info()  # Esta línea intentará conectar y obtener información del servidor
