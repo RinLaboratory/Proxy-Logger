@@ -12,7 +12,9 @@ def PROCESS_LOG_DATA_BUNGEECORD(
 ):
     try:
         if line.startswith("[") and (
-            ("ServerConnector" in line) or ("DownstreamBridge" in line)
+            ("ServerConnector" in line)
+            or ("DownstreamBridge" in line)
+            or ("UpstreamBridge" in line)
         ):
             log_datetime = GET_LOG_DATEHOURS(line, log_filename)
             splited_line = line.split()
@@ -27,7 +29,11 @@ def PROCESS_LOG_DATA_BUNGEECORD(
                 ip_and_port = player_and_ip[1].split("/")
                 ip = ip_and_port[1].split(":")[0]
             else:
-                player_and_ip = splited_line[splited_line.index("<->") - 1].split("|")
+                if "DownstreamBridge" in line:
+                    player_and_ip = splited_line[splited_line.index("<->") - 1].split("|")
+                else: 
+                    player_and_ip = splited_line[splited_line.index("->") - 1].split("|")
+
                 playername = player_and_ip[1].replace("]", "")
                 ip_and_port = player_and_ip[0].split("/")
                 ip = ip_and_port[1].split(":")[0]
