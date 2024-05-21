@@ -37,7 +37,7 @@ def IMPORT_FROM_FILES(
         fileIsLoaded = SEARCH_HASH(file_hash, loadedData["file"])
 
         if log_file != "latest.log":
-            if fileIsLoaded != -1:
+            if fileIsLoaded == -1:
                 # Creación del objeto
                 log_file_id = objectid.ObjectId()
                 insertData["file"].append(
