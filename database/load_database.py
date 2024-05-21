@@ -13,6 +13,8 @@ def LOAD_DATABASE_BEFORE_NEW_IMPORT(config: TypesConfig, loadedData: TypesLoaded
     db = GET_DATABASE(config["mongodb_connection_string"])
 
     # Using dictionaries for faster lookups
+    # Originally db[""].find() returns a Cursor object that can be iterated.
+    # and Cursor has a method called clone() that allows to copy the result of the query.
     playername_query: list[TypesMongoPlayer] = db["player"].find()
     playername_query_as_id = playername_query.clone()
     loadedData["player"] = {
