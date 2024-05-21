@@ -3,7 +3,7 @@ from utils.types import TypesLoadedData, TypesInsertedData
 from log_processing.get_log_hours import GET_LOG_DATEHOURS
 
 
-def WRITE_PLAYER_TO_DATABASE(
+def PROCESS_LOG_DATA_VELOCITY(
     line: str,
     log_filename: str,
     log_file_id: objectid.ObjectId,

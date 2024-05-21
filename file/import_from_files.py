@@ -3,7 +3,7 @@ import multiprocessing
 from bson import objectid
 from file.read_file import READ_FILE
 from utils.types import TypesLoadedData, TypesInsertedData
-from database.write_player_to_database import WRITE_PLAYER_TO_DATABASE
+from log_processing.process_log_data_velocity import PROCESS_LOG_DATA_VELOCITY
 
 
 def IMPORT_FROM_FILES(
@@ -49,13 +49,22 @@ def IMPORT_FROM_FILES(
                 )
 
                 for merged_line in file_lines:
-                    WRITE_PLAYER_TO_DATABASE(
-                        merged_line,
-                        log_file,
-                        log_file_id,
-                        insertData,
-                        loadedData,
-                    )
+                    if proxy_type == "velocity":
+                        PROCESS_LOG_DATA_VELOCITY(
+                            merged_line,
+                            log_file,
+                            log_file_id,
+                            insertData,
+                            loadedData,
+                        )
+                    else:
+                        PROCESS_LOG_DATA_VELOCITY(
+                            merged_line,
+                            log_file,
+                            log_file_id,
+                            insertData,
+                            loadedData,
+                        )
             else:
                 print("skipped file " + log_file + " as it was already loaded.")
         else:
