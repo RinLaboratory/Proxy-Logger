@@ -3,7 +3,7 @@ from tkinter import ttk
 from utils.types import TypesConfig
 from gui.import_dialog import IMPORT
 from pymongo.database import Database
-from database.search_from_database import SEARCH
+from gui.search_from_database import SEARCH
 
 
 def CREATE_GUI(
@@ -32,7 +32,7 @@ def CREATE_GUI(
     button_buscar = ttk.Button(
         frame_principal,
         text="Buscar",
-        command=lambda: SEARCH(db, entry_input, tree_logs, tree_dupeip, tree_alts),
+        command=lambda: SEARCH(db, entry_input, tree_logs, tree_dupeip, tree_alts, button_buscar),
     )
     button_buscar.grid(row=1, column=1, padx=5, pady=5)
     button_importar = ttk.Button(
