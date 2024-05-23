@@ -1,5 +1,6 @@
 import re as regex
 from tkinter import ttk
+from tkinter import messagebox
 from pymongo.database import Database
 
 
@@ -20,6 +21,10 @@ def SEARCH(
     for i in tree_dupeip.get_children():
         tree_dupeip.delete(i)
 
+    if search_bar_text == "" or search_bar_text is None:
+        messagebox.showerror("Error", "No hay nada que buscar.")
+        return
+
     # Regex para una dirección IP
     patron_ip = r"^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
     if regex.match(patron_ip, search_bar_text) is None:
@@ -29,6 +34,10 @@ def SEARCH(
         # Buscar por jugador
         playername_query = db["player"].find_one({"playername": search_bar_text})
         tree_alts.insert("", "end", values=(str(search_bar_text)))
+
+        if playername_query is None:
+            messagebox.showerror("Error", "El jugador "+search_bar_text+" no existe o nunca ha entrado.")
+            return
 
         # Buscar la actividad del jugador
         activity_query = (
