@@ -3,6 +3,7 @@ import multiprocessing
 from tkinter import ttk
 from queue import Queue, Empty
 from tkinter import messagebox
+from pymongo import DESCENDING
 from utils.types import TypesInsertedData, TypesConfig, TypesLoadedData
 from database.get_database import GET_DATABASE
 from log_processing.process_insert_data import PROCESS_INSERT_DATA
@@ -97,6 +98,10 @@ def WAIT_FOR_PROCESS(
         print(
             "ignored insert_many in activity collection as processed data it was empty"
         )
+    
+    db["activity"].create_index([('subplayername', DESCENDING)])
+    db["ip_address"].create_index([('subplayername', DESCENDING), ('ip', DESCENDING)])
+    db["player"].create_index([('subplayername', DESCENDING)])
 
     # Rehabilitar botones
     iniciar_button.config(state="normal")
