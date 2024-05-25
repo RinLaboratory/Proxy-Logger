@@ -25,7 +25,6 @@ def WAIT_FOR_PROCESS(
     unprocessedInsertData: TypesInsertedData = {
         "player": [],
         "ip_address": [],
-        "player_ip": [],
         "file": [],
         "activity": [],
     }
@@ -66,10 +65,6 @@ def WAIT_FOR_PROCESS(
                     unprocessedInsertData["player"] = (
                         unprocessedInsertData["player"] + insertData["player"]
                     )
-                    unprocessedInsertData["player_ip"] = (
-                        unprocessedInsertData["player_ip"] + insertData["player_ip"]
-                    )
-
             except Empty:
                 pass  # La cola está vacía, continuar
 
@@ -78,7 +73,7 @@ def WAIT_FOR_PROCESS(
         p.join()
 
     print("procesando...")
-    processedInsertData = PROCESS_INSERT_DATA(unprocessedInsertData, loadedData)
+    processedInsertData = PROCESS_INSERT_DATA(unprocessedInsertData)
 
     db = GET_DATABASE(config["mongodb_connection_string"])
 
@@ -92,12 +87,6 @@ def WAIT_FOR_PROCESS(
     else:
         print(
             "ignored insert_many in ip_address collection as processed data it was empty"
-        )
-    if len(processedInsertData["player_ip"]) > 0:
-        db["player_ip"].insert_many(processedInsertData["player_ip"], ordered=False)
-    else:
-        print(
-            "ignored insert_many in player_ip collection as processed data it was empty"
         )
     if len(processedInsertData["file"]) > 0:
         db["file"].insert_many(processedInsertData["file"], ordered=False)
