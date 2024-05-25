@@ -12,9 +12,9 @@ def IMPORT_FROM_FILES(
     proxy_type: str,
     directory: str,
     progress_queue: multiprocessing.Queue,
-    loadedData: TypesLoadedData,
+    loaded_data: TypesLoadedData,
 ):
-    insertData: TypesInsertedData = {
+    insert_data: TypesInsertedData = {
         "player": [],
         "ip_address": [],
         "player_ip": [],
@@ -34,13 +34,13 @@ def IMPORT_FROM_FILES(
         # cuando es == None significa que el hash no está presente.
         # Lo ideal es ignorar los archivos llamados latest.log porque todavia no
         # se manejan bien.
-        fileIsLoaded = loadedData["file"].get(file_hash)
+        fileIsLoaded = loaded_data["file"].get(file_hash)
 
         if log_file != "latest.log":
             if fileIsLoaded is None:
                 # Creación del objeto
                 log_file_id = objectid.ObjectId()
-                insertData["file"].append(
+                insert_data["file"].append(
                     {
                         "_id": log_file_id,
                         "file_name": log_file,
@@ -55,16 +55,16 @@ def IMPORT_FROM_FILES(
                             merged_line,
                             log_file,
                             log_file_id,
-                            insertData,
-                            loadedData,
+                            insert_data,
+                            loaded_data,
                         )
                     else:
                         PROCESS_LOG_DATA_BUNGEECORD(
                             merged_line,
                             log_file,
                             log_file_id,
-                            insertData,
-                            loadedData,
+                            insert_data,
+                            loaded_data,
                         )
             else:
                 print("skipped file " + log_file + " as it was already loaded.")
@@ -72,4 +72,4 @@ def IMPORT_FROM_FILES(
             print("ignored latest.log")
 
         progress_queue.put((1, {}))
-    progress_queue.put((100, insertData))
+    progress_queue.put((100, insert_data))

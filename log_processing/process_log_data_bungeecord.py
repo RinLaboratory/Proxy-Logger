@@ -7,8 +7,8 @@ def PROCESS_LOG_DATA_BUNGEECORD(
     line: str,
     log_filename: str,
     log_file_id: objectid.ObjectId,
-    insertData: TypesInsertedData,
-    loadedData: TypesLoadedData,
+    insert_data: TypesInsertedData,
+    loaded_data: TypesLoadedData,
 ):
     try:
         if line.startswith("[") and (
@@ -45,8 +45,8 @@ def PROCESS_LOG_DATA_BUNGEECORD(
                 ip_and_port = player_and_ip[0].split("/")
                 ip = ip_and_port[1].split(":")[0]
 
-            playername_isPresent = loadedData["player"].get(playername_lower)
-            ip_isPresent = loadedData["ip_address"].get(ip + playername_lower)
+            playername_isPresent = loaded_data["player"].get(playername_lower)
+            ip_isPresent = loaded_data["ip_address"].get(ip + playername_lower)
 
             if playername_isPresent is not None:
                 # El jugador está presente desde antes
@@ -54,16 +54,16 @@ def PROCESS_LOG_DATA_BUNGEECORD(
             else:
                 # El jugador no está presente y se debe ingresar en la db
                 inserted_playername = playername_lower
-                insertData["player"].append(
+                insert_data["player"].append(
                     {"playername": playername, "subplayername": playername_lower}
                 )
 
             if ip_isPresent is None:
-                insertData["ip_address"].append(
+                insert_data["ip_address"].append(
                     {"ip": ip, "subplayername": inserted_playername}
                 )
 
-            insertData["activity"].append(
+            insert_data["activity"].append(
                 {
                     "_id": objectid.ObjectId(),
                     "file_id": log_file_id,
@@ -83,7 +83,7 @@ def PROCESS_LOG_DATA_BUNGEECORD(
             )
             playername_lower = playername.lower()
 
-            playername_isPresent = loadedData["player"].get(playername_lower)
+            playername_isPresent = loaded_data["player"].get(playername_lower)
 
             if playername_isPresent is not None:
                 # El jugador está presente desde antes
@@ -91,11 +91,11 @@ def PROCESS_LOG_DATA_BUNGEECORD(
             else:
                 # El jugador no está presente y se debe ingresar en la db
                 inserted_playername = playername_lower
-                insertData["player"].append(
+                insert_data["player"].append(
                     {"playername": playername, "subplayername": playername_lower}
                 )
 
-            insertData["activity"].append(
+            insert_data["activity"].append(
                 {
                     "_id": objectid.ObjectId(),
                     "file_id": log_file_id,
@@ -116,7 +116,7 @@ def PROCESS_LOG_DATA_BUNGEECORD(
                 playername = splited_line[splited_line.index("user") + 1]
                 playername_lower = playername.lower()
 
-                playername_isPresent = loadedData["player"].get(playername)
+                playername_isPresent = loaded_data["player"].get(playername)
 
                 if playername_isPresent is not None:
                     # El jugador está presente desde antes
@@ -124,11 +124,11 @@ def PROCESS_LOG_DATA_BUNGEECORD(
                 else:
                     # El jugador no está presente y se debe ingresar en la db
                     inserted_playername = playername_lower
-                    insertData["player"].append(
+                    insert_data["player"].append(
                         {"playername": playername, "subplayername": playername_lower}
                     )
 
-                insertData["activity"].append(
+                insert_data["activity"].append(
                     {
                         "_id": objectid.ObjectId(),
                         "file_id": log_file_id,

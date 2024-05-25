@@ -20,7 +20,7 @@ def IMPORT_PROCESS(
     carpeta_button: ttk.Button,
     config: TypesConfig,
 ):
-    loadedData: TypesLoadedData = {
+    loaded_data: TypesLoadedData = {
         "player": {},
         "player_as_id": {},
         "ip_address": {},
@@ -48,7 +48,7 @@ def IMPORT_PROCESS(
     )
 
     print("Cargando db...")
-    LOAD_DATABASE_BEFORE_NEW_IMPORT(config, loadedData)
+    LOAD_DATABASE_BEFORE_NEW_IMPORT(config, loaded_data)
 
     list_logs_files = os.listdir(carpeta)
 
@@ -85,7 +85,7 @@ def IMPORT_PROCESS(
                 proxy_type,
                 carpeta,
                 progress_queues[i],
-                loadedData,
+                loaded_data,
             ),
         )
         process.append(import_process)
@@ -103,7 +103,6 @@ def IMPORT_PROCESS(
             iniciar_button,
             carpeta_button,
             total_files,
-            loadedData,
         ),
     )
     wait_for_threads.start()

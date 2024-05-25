@@ -5,7 +5,7 @@ from queue import Queue, Empty
 from tkinter import messagebox
 from utils.types import TypesInsertedData, TypesConfig, TypesLoadedData
 from database.get_database import GET_DATABASE
-from log_processing.processInsertData import PROCESS_INSERT_DATA
+from log_processing.process_insert_data import PROCESS_INSERT_DATA
 
 
 def WAIT_FOR_PROCESS(
@@ -17,12 +17,11 @@ def WAIT_FOR_PROCESS(
     iniciar_button: ttk.Button,
     carpeta_button: ttk.Button,
     total_files: int,  # Número total de archivos a procesar
-    loadedData: TypesLoadedData,
 ):
     # Total de archivos procesados por todos los procesos
     total_processed_files = 0
 
-    unprocessedInsertData: TypesInsertedData = {
+    unprocessed_insert_data: TypesInsertedData = {
         "player": [],
         "ip_address": [],
         "file": [],
@@ -34,8 +33,8 @@ def WAIT_FOR_PROCESS(
         for i, import_process in enumerate(process):
             try:
                 progress: int
-                insertData: TypesInsertedData
-                progress, insertData = progress_queues[i].get_nowait()
+                insert_data: TypesInsertedData
+                progress, insert_data = progress_queues[i].get_nowait()
 
                 if progress == 1:
                     total_processed_files += 1
@@ -53,17 +52,17 @@ def WAIT_FOR_PROCESS(
                     )
                     importar_window.update_idletasks()
                 else:
-                    unprocessedInsertData["activity"] = (
-                        unprocessedInsertData["activity"] + insertData["activity"]
+                    unprocessed_insert_data["activity"] = (
+                        unprocessed_insert_data["activity"] + insert_data["activity"]
                     )
-                    unprocessedInsertData["file"] = (
-                        unprocessedInsertData["file"] + insertData["file"]
+                    unprocessed_insert_data["file"] = (
+                        unprocessed_insert_data["file"] + insert_data["file"]
                     )
-                    unprocessedInsertData["ip_address"] = (
-                        unprocessedInsertData["ip_address"] + insertData["ip_address"]
+                    unprocessed_insert_data["ip_address"] = (
+                        unprocessed_insert_data["ip_address"] + insert_data["ip_address"]
                     )
-                    unprocessedInsertData["player"] = (
-                        unprocessedInsertData["player"] + insertData["player"]
+                    unprocessed_insert_data["player"] = (
+                        unprocessed_insert_data["player"] + insert_data["player"]
                     )
             except Empty:
                 pass  # La cola está vacía, continuar
@@ -73,27 +72,27 @@ def WAIT_FOR_PROCESS(
         p.join()
 
     print("procesando...")
-    processedInsertData = PROCESS_INSERT_DATA(unprocessedInsertData)
+    processed_insert_data = PROCESS_INSERT_DATA(unprocessed_insert_data)
 
     db = GET_DATABASE(config["mongodb_connection_string"])
 
     print("insertando en mongo...")
-    if len(processedInsertData["player"]) > 0:
-        db["player"].insert_many(processedInsertData["player"], ordered=False)
+    if len(processed_insert_data["player"]) > 0:
+        db["player"].insert_many(processed_insert_data["player"], ordered=False)
     else:
         print("ignored insert_many in player collection as processed data it was empty")
-    if len(processedInsertData["ip_address"]) > 0:
-        db["ip_address"].insert_many(processedInsertData["ip_address"], ordered=False)
+    if len(processed_insert_data["ip_address"]) > 0:
+        db["ip_address"].insert_many(processed_insert_data["ip_address"], ordered=False)
     else:
         print(
             "ignored insert_many in ip_address collection as processed data it was empty"
         )
-    if len(processedInsertData["file"]) > 0:
-        db["file"].insert_many(processedInsertData["file"], ordered=False)
+    if len(processed_insert_data["file"]) > 0:
+        db["file"].insert_many(processed_insert_data["file"], ordered=False)
     else:
         print("ignored insert_many in file collection as processed data it was empty")
-    if len(processedInsertData["activity"]) > 0:
-        db["activity"].insert_many(processedInsertData["activity"], ordered=False)
+    if len(processed_insert_data["activity"]) > 0:
+        db["activity"].insert_many(processed_insert_data["activity"], ordered=False)
     else:
         print(
             "ignored insert_many in activity collection as processed data it was empty"
