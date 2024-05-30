@@ -22,10 +22,7 @@ def IMPORT_PROCESS(
 ):
     loaded_data: TypesLoadedData = {
         "player": {},
-        "player_as_id": {},
         "ip_address": {},
-        "ip_address_as_id": {},
-        "player_ip": {},
         "file": {},
     }
 
