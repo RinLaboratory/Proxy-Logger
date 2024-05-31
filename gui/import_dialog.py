@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
 from utils.types import TypesConfig
-from multiprocess.import_process import IMPORT_PROCESS
+from log_processing.import_process import IMPORT_PROCESS
 from file.select_folder import SELECT_IMPORT_FOLDER
 
 

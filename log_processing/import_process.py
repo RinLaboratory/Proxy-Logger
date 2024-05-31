@@ -6,7 +6,7 @@ from tkinter import ttk
 from tkinter import messagebox
 from utils.types import TypesConfig
 from utils.types import TypesLoadedData
-from file.import_from_files import IMPORT_FROM_FILES
+from multiprocess.import_from_files import IMPORT_FROM_FILES
 from thread.wait_for_process import WAIT_FOR_PROCESS
 from database.load_database import LOAD_DATABASE_BEFORE_NEW_IMPORT
 
