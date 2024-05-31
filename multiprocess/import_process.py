@@ -24,6 +24,8 @@ def IMPORT_PROCESS(
         "player": {},
         "ip_address": {},
         "file": {},
+        "latest_file": {},
+        "latest_activity": {},
     }
 
     # Deshabilitar botones

@@ -36,6 +36,8 @@ class TypesLoadedData(TypedDict):
     player: dict[str, tuple[str, str]]
     ip_address: dict[str, tuple[str, str]]
     file: dict[str, tuple[str, str]]
+    latest_file: dict[str, tuple[str, str, ObjectId]]
+    latest_activity: dict[str, list[str]]
 
 
 class TypesInsertedData(TypedDict):
@@ -43,3 +45,6 @@ class TypesInsertedData(TypedDict):
     ip_address: list[TypesMongoIpAddress]
     file: list[TypesMongoFile]
     activity: list[TypesMongoActivity]
+    latest_file: list[TypesMongoFile]
+    latest_activity: list[TypesMongoActivity]
+    file_marked_for_deletion: list[ObjectId]

@@ -3,6 +3,7 @@ from utils.types import (
     TypesMongoFile,
     TypesMongoPlayer,
     TypesMongoIpAddress,
+    TypesMongoActivity,
 )
 from utils.types import TypesConfig
 from database.get_database import GET_DATABASE
@@ -34,3 +35,21 @@ def LOAD_DATABASE_BEFORE_NEW_IMPORT(config: TypesConfig, loaded_data: TypesLoade
         file_data["hash"]: (file_data["file_name"], file_data["hash"])
         for file_data in file_hash
     }
+
+    latest_file: list[TypesMongoFile] = db["latest_file"].find()
+    loaded_data["latest_file"] = {
+        latest_data["hash"]: (
+            latest_data["file_name"],
+            latest_data["hash"],
+            latest_data["_id"],
+        )
+        for latest_data in latest_file
+    }
+
+    for latest_file_data in loaded_data["latest_file"].values():
+        latest_file_id = latest_file_data[2]
+        latest_activity: list[TypesMongoActivity] = (
+            db["latest_activity"].find({"file_id": latest_file_id}).sort("timestamp")
+        )
+        latest_activity_data = [activity["text"] for activity in latest_activity]
+        loaded_data["latest_activity"][latest_file_id] = latest_activity_data

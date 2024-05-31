@@ -39,15 +39,26 @@ def PROCESS_LOG_DATA_VELOCITY(
                     {"ip": ip, "subplayername": inserted_playername}
                 )
 
-            insert_data["activity"].append(
-                {
-                    "_id": objectid.ObjectId(),
-                    "file_id": log_file_id,
-                    "text": "".join(line),
-                    "timestamp": log_datetime,
-                    "subplayername": playername_lower,
-                }
-            )
+            if log_filename != "latest.log":
+                insert_data["activity"].append(
+                    {
+                        "_id": objectid.ObjectId(),
+                        "file_id": log_file_id,
+                        "text": "".join(line),
+                        "timestamp": log_datetime,
+                        "subplayername": playername_lower,
+                    }
+                )
+            else:
+                insert_data["latest_activity"].append(
+                    {
+                        "_id": objectid.ObjectId(),
+                        "file_id": log_file_id,
+                        "text": "".join(line),
+                        "timestamp": log_datetime,
+                        "subplayername": playername_lower,
+                    }
+                )
 
         elif line.startswith("[") and ("[server connection]" in line):
             log_datetime = GET_LOG_DATEHOURS(line, log_filename)
@@ -67,15 +78,26 @@ def PROCESS_LOG_DATA_VELOCITY(
                     {"playername": playername, "subplayername": playername_lower}
                 )
 
-            insert_data["activity"].append(
-                {
-                    "_id": objectid.ObjectId(),
-                    "file_id": log_file_id,
-                    "text": "".join(line),
-                    "timestamp": log_datetime,
-                    "subplayername": playername_lower,
-                }
-            )
+            if log_filename != "latest.log":
+                insert_data["activity"].append(
+                    {
+                        "_id": objectid.ObjectId(),
+                        "file_id": log_file_id,
+                        "text": "".join(line),
+                        "timestamp": log_datetime,
+                        "subplayername": playername_lower,
+                    }
+                )
+            else:
+                insert_data["latest_activity"].append(
+                    {
+                        "_id": objectid.ObjectId(),
+                        "file_id": log_file_id,
+                        "text": "".join(line),
+                        "timestamp": log_datetime,
+                        "subplayername": playername_lower,
+                    }
+                )
 
         elif line.startswith("[") and ("[nlogin]" in line):
             if (
@@ -100,15 +122,26 @@ def PROCESS_LOG_DATA_VELOCITY(
                         {"playername": playername, "subplayername": playername_lower}
                     )
 
-                insert_data["activity"].append(
-                    {
-                        "_id": objectid.ObjectId(),
-                        "file_id": log_file_id,
-                        "text": "".join(line),
-                        "timestamp": log_datetime,
-                        "subplayername": playername_lower,
-                    }
-                )
+                if log_filename != "latest.log":
+                    insert_data["activity"].append(
+                        {
+                            "_id": objectid.ObjectId(),
+                            "file_id": log_file_id,
+                            "text": "".join(line),
+                            "timestamp": log_datetime,
+                            "subplayername": playername_lower,
+                        }
+                    )
+                else:
+                    insert_data["latest_activity"].append(
+                        {
+                            "_id": objectid.ObjectId(),
+                            "file_id": log_file_id,
+                            "text": "".join(line),
+                            "timestamp": log_datetime,
+                            "subplayername": playername_lower,
+                        }
+                    )
 
     except Exception as e:
         print(f"Error processing line: {line}")

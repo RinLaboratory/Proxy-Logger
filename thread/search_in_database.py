@@ -39,6 +39,11 @@ def SEARCH_IN_DATABASE(
             .find({"subplayername": search_bar_text.lower()})
             .sort("timestamp")
         )
+        latest_activity_query = (
+            db["latest_activity"]
+            .find({"subplayername": search_bar_text.lower()})
+            .sort("timestamp")
+        )
 
         # Buscar las ips relacionadas con el jugador
         ip_query = db["ip_address"].find({"subplayername": search_bar_text.lower()})
@@ -47,6 +52,15 @@ def SEARCH_IN_DATABASE(
             tree_dupeip.insert("", "end", values=(str(ip["ip"])))
 
         for activity in activity_query:
+            tree_logs.insert(
+                "",
+                "end",
+                values=(
+                    str(activity["timestamp"]),
+                    str(activity["text"]).replace("\n", " "),
+                ),
+            )
+        for activity in latest_activity_query:
             tree_logs.insert(
                 "",
                 "end",

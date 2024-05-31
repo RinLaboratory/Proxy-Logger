@@ -27,6 +27,9 @@ def WAIT_FOR_PROCESS(
         "ip_address": [],
         "file": [],
         "activity": [],
+        "latest_activity": [],
+        "latest_file": [],
+        "file_marked_for_deletion": [],
     }
 
     # Actualizar la barra de progreso mientras se reciben actualizaciones desde las colas
@@ -60,10 +63,23 @@ def WAIT_FOR_PROCESS(
                         unprocessed_insert_data["file"] + insert_data["file"]
                     )
                     unprocessed_insert_data["ip_address"] = (
-                        unprocessed_insert_data["ip_address"] + insert_data["ip_address"]
+                        unprocessed_insert_data["ip_address"]
+                        + insert_data["ip_address"]
                     )
                     unprocessed_insert_data["player"] = (
                         unprocessed_insert_data["player"] + insert_data["player"]
+                    )
+                    unprocessed_insert_data["latest_activity"] = (
+                        unprocessed_insert_data["latest_activity"]
+                        + insert_data["latest_activity"]
+                    )
+                    unprocessed_insert_data["latest_file"] = (
+                        unprocessed_insert_data["latest_file"]
+                        + insert_data["latest_file"]
+                    )
+                    unprocessed_insert_data["file_marked_for_deletion"] = (
+                        unprocessed_insert_data["file_marked_for_deletion"]
+                        + insert_data["file_marked_for_deletion"]
                     )
             except Empty:
                 pass  # La cola está vacía, continuar
@@ -98,10 +114,37 @@ def WAIT_FOR_PROCESS(
         print(
             "ignored insert_many in activity collection as processed data it was empty"
         )
-    
-    db["activity"].create_index([('subplayername', DESCENDING)])
-    db["ip_address"].create_index([('subplayername', DESCENDING), ('ip', DESCENDING)])
-    db["player"].create_index([('subplayername', DESCENDING)])
+    if len(processed_insert_data["latest_activity"]) > 0:
+        db["latest_activity"].insert_many(
+            processed_insert_data["latest_activity"], ordered=False
+        )
+    else:
+        print(
+            "ignored insert_many in latest_activity collection as processed data it was empty"
+        )
+    if len(processed_insert_data["latest_file"]) > 0:
+        db["latest_file"].insert_many(
+            processed_insert_data["latest_file"], ordered=False
+        )
+    else:
+        print(
+            "ignored insert_many in latest_file collection as processed data it was empty"
+        )
+    if len(processed_insert_data["file_marked_for_deletion"]) > 0:
+        for marked_file in processed_insert_data["file_marked_for_deletion"]:
+            db["latest_file"].delete_many({"_id": marked_file})
+            db["latest_activity"].delete_many({"file_id": marked_file})
+    else:
+        print(
+            "ignored delete_many instruction as file_marked_for_deletion data was empty"
+        )
+
+    db["activity"].create_index([("subplayername", DESCENDING)])
+    db["ip_address"].create_index([("subplayername", DESCENDING), ("ip", DESCENDING)])
+    db["player"].create_index([("subplayername", DESCENDING)])
+    db["latest_activity"].create_index(
+        [("subplayername", DESCENDING), ("file_id", DESCENDING)]
+    )
 
     # Rehabilitar botones
     iniciar_button.config(state="normal")
