@@ -16,7 +16,7 @@ You can get player activity by timestamp within a IP address and a username.
 - If you search by IP address it will show all players binded to that IP, and the times they changed IP.
 - If you search by username it will show all IP's binded to that player.
 
-At the time this app only accepts `*.log` files and excludes `latest.log` as currently doesnt have a way to process an unfinished log file.
+At the time this app only accepts `*.log` files.
 
 If you use [nLogin](https://en.docs.nickuc.com/) this will append the player activity related to that plugin, such as:
 
@@ -25,7 +25,7 @@ If you use [nLogin](https://en.docs.nickuc.com/) this will append the player act
 
 This is important within the logs as it marks when the actual player session starts
 
-All the information thats returned its ordered by timestamp (date and hour) so no need to worry about importing order between outdated logs and most recent ones.
+All the information thats returned its ordered by timestamp (date and hour) so no need to worry about importing order between outdated logs and most recent ones. `latest.log` activity related will always show at the bottom.
 
 ## Install dependencies
 
