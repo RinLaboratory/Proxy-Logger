@@ -44,6 +44,7 @@ All ip addresses that have `-` in the country variable means it doesnt currently
 
 ## Country names to iso2
 
+### This option is only available when importing from Velocity proxies.
 from [brenes github](https://gist.github.com/brenes/1095110#file-paises-csv) download `paises.csv` and put it inside the `./country_processing` folder and rename it as `spanish-countries.csv`.
 if you have a Anti-VPN provider like [v4Guard](https://v4guard.io/) and in the disconnect message shows the country name this part will be useful. this function currently supports spanish and english country names.
 
