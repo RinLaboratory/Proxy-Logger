@@ -6,6 +6,8 @@ This project uses Python `v3.11.3`, MongoDB, Tkinter, hashlib, os, threading, mu
 
 Until now `17-05-2024` all this packages are integrated within python.
 
+Proxy-Logger uses the IP2Location LITE database for <a href="https://lite.ip2location.com">IP geolocation</a>.
+
 ## What it does
 
 This app is intented to create a simple activity viewer to Minecraft based proxys
@@ -32,6 +34,18 @@ All the information thats returned its ordered by timestamp (date and hour) so n
 Run `pip install pymongo httpx httpcore`
 
 Make sure that u have `pymongo`, `httpx` and `httpcore` updated. otherwise it will throw a weird error saying they're incompatible with each other.
+
+## Populate Country DB
+
+from [ip2location website](https://lite.ip2location.com) download CSV database and put it inside the `./country_processing` folder and rename it as `IP2LOCATION-LITE-DB3.CSV`.
+Run `python ./country_processing/populate_country_database.py` to populate the database with country data for fetching purposes within the app.
+The app will fetch all ip addresses countries from that database.
+All ip addresses that have `-` in the country variable means it doesnt currently exist in the ip2location db.
+
+## Country names to iso2
+
+from [brenes github](https://gist.github.com/brenes/1095110#file-paises-csv) download `paises.csv` and put it inside the `./country_processing` folder and rename it as `spanish-countries.csv`.
+if you have a Anti-VPN provider like [v4Guard](https://v4guard.io/) and in the disconnect message shows the country name this part will be useful. this function currently supports spanish and english country names.
 
 ## How to run
 
