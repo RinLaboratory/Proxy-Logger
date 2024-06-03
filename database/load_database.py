@@ -30,6 +30,12 @@ def LOAD_DATABASE_BEFORE_NEW_IMPORT(config: TypesConfig, loaded_data: TypesLoade
         for ip in ip_query
     }
 
+    ip_record_query: list[TypesMongoIpAddress] = db["ip_record"].find()
+    loaded_data["ip_record"] = {
+        ip_record["ip"]: (ip_record["ip"], ip_record["country"])
+        for ip_record in ip_record_query
+    }
+
     file_hash: list[TypesMongoFile] = db["file"].find()
     loaded_data["file"] = {
         file_data["hash"]: (file_data["file_name"], file_data["hash"])

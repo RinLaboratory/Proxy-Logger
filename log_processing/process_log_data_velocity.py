@@ -1,6 +1,8 @@
+import re
 from bson import objectid
-from utils.types import TypesLoadedData, TypesInsertedData
 from log_processing.get_log_hours import GET_LOG_DATEHOURS
+from country_processing.search_country import SEARCH_COUNTRY
+from utils.types import TypesLoadedData, TypesInsertedData, TypesCountryDictionary
 
 
 def PROCESS_LOG_DATA_VELOCITY(
@@ -9,6 +11,7 @@ def PROCESS_LOG_DATA_VELOCITY(
     log_file_id: objectid.ObjectId,
     insert_data: TypesInsertedData,
     loaded_data: TypesLoadedData,
+    countries: TypesCountryDictionary,
 ):
     try:
         if line.startswith("[") and ("[connected player]" in line):
@@ -35,9 +38,40 @@ def PROCESS_LOG_DATA_VELOCITY(
                 )
 
             if ip_isPresent is None:
-                insert_data["ip_address"].append(
-                    {"ip": ip, "subplayername": inserted_playername}
-                )
+                if (
+                    ("VPN o un Proxy" in line)
+                    or ("VPN or Proxy" in line)
+                    or ("VPN o Proxy" in line)
+                ):
+                    insert_data["ip_address"].append(
+                        {"ip": ip, "subplayername": inserted_playername, "isVPN": True}
+                    )
+                    if "desde: " in line:
+                        start_index = splited_line.index("desde:") + 1
+                        country_name = ""
+                        # Asegúrate de que start_index es válido
+                        if start_index < len(splited_line):
+                            # Combina todas las partes del país que pueden estar divididas por espacios
+                            country_parts = []
+                            for i in range(start_index, len(splited_line)):
+                                part = re.sub(r"§.", "", splited_line[i])
+
+                                country_parts.append(part)
+                                # Detener si encontramos el final del país o el comienzo de otra sección
+                                if "." in part:
+                                    break
+
+                            # Unir las partes para obtener el nombre completo del país
+                            country_name = " ".join(country_parts).replace(".", "")
+                        country = SEARCH_COUNTRY(
+                            country_name,
+                            countries,
+                        )
+                        insert_data["ip_record"].append({"ip": ip, "country": country})
+                else:
+                    insert_data["ip_address"].append(
+                        {"ip": ip, "subplayername": inserted_playername}
+                    )
 
             if log_filename != "latest.log":
                 insert_data["activity"].append(
@@ -116,10 +150,17 @@ def PROCESS_LOG_DATA_VELOCITY(
                     # El jugador está presente desde antes
                     inserted_playername = playername_isPresent[0]
                 else:
+                    isPremium = False
+                    if "premium account" in line:
+                        isPremium = True
                     # El jugador no está presente y se debe ingresar en la db
                     inserted_playername = playername_lower
                     insert_data["player"].append(
-                        {"playername": playername, "subplayername": playername_lower}
+                        {
+                            "playername": playername,
+                            "subplayername": playername_lower,
+                            "isPremium": isPremium,
+                        }
                     )
 
                 if log_filename != "latest.log":

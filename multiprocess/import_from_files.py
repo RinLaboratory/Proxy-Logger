@@ -6,6 +6,9 @@ from utils.types import TypesLoadedData, TypesInsertedData
 from file.chech_file_is_from_latest_log import CHECK_FILE_IS_FROM_LATEST_LOG
 from log_processing.process_log_data_velocity import PROCESS_LOG_DATA_VELOCITY
 from log_processing.process_log_data_bungeecord import PROCESS_LOG_DATA_BUNGEECORD
+from country_processing.parse_countries_as_dictionary import (
+    PARSE_COUNTRIES_AS_DICTIONARY,
+)
 
 
 def IMPORT_FROM_FILES(
@@ -18,6 +21,7 @@ def IMPORT_FROM_FILES(
     insert_data: TypesInsertedData = {
         "player": [],
         "ip_address": [],
+        "ip_record": [],
         "player_ip": [],
         "file": [],
         "activity": [],
@@ -25,6 +29,8 @@ def IMPORT_FROM_FILES(
         "latest_activity": [],
         "file_marked_for_deletion": [],
     }
+
+    countries = PARSE_COUNTRIES_AS_DICTIONARY()
 
     for index, log_file in enumerate(list_logs_files):
         # print("[Queue " + str(queue_number) + "] " + log_file)
@@ -79,6 +85,7 @@ def IMPORT_FROM_FILES(
                         log_file_id,
                         insert_data,
                         loaded_data,
+                        countries,
                     )
                 else:
                     PROCESS_LOG_DATA_BUNGEECORD(

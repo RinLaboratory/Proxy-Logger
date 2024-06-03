@@ -23,6 +23,7 @@ def IMPORT_PROCESS(
     loaded_data: TypesLoadedData = {
         "player": {},
         "ip_address": {},
+        "ip_record": {},
         "file": {},
         "latest_file": {},
         "latest_activity": {},

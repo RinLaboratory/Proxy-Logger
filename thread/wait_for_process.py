@@ -4,7 +4,7 @@ from tkinter import ttk
 from queue import Queue, Empty
 from tkinter import messagebox
 from pymongo import DESCENDING
-from utils.types import TypesInsertedData, TypesConfig, TypesLoadedData
+from utils.types import TypesInsertedData, TypesConfig
 from database.get_database import GET_DATABASE
 from log_processing.process_insert_data import PROCESS_INSERT_DATA
 
@@ -25,6 +25,7 @@ def WAIT_FOR_PROCESS(
     unprocessed_insert_data: TypesInsertedData = {
         "player": [],
         "ip_address": [],
+        "ip_record": [],
         "file": [],
         "activity": [],
         "latest_activity": [],
@@ -66,6 +67,9 @@ def WAIT_FOR_PROCESS(
                         unprocessed_insert_data["ip_address"]
                         + insert_data["ip_address"]
                     )
+                    unprocessed_insert_data["ip_record"] = (
+                        unprocessed_insert_data["ip_record"] + insert_data["ip_record"]
+                    )
                     unprocessed_insert_data["player"] = (
                         unprocessed_insert_data["player"] + insert_data["player"]
                     )
@@ -89,7 +93,7 @@ def WAIT_FOR_PROCESS(
         p.join()
 
     print("procesando...")
-    processed_insert_data = PROCESS_INSERT_DATA(unprocessed_insert_data)
+    processed_insert_data = PROCESS_INSERT_DATA(unprocessed_insert_data, config)
 
     db = GET_DATABASE(config["mongodb_connection_string"])
 
@@ -103,6 +107,12 @@ def WAIT_FOR_PROCESS(
     else:
         print(
             "ignored insert_many in ip_address collection as processed data it was empty"
+        )
+    if len(processed_insert_data["ip_record"]) > 0:
+        db["ip_record"].insert_many(processed_insert_data["ip_record"], ordered=False)
+    else:
+        print(
+            "ignored insert_many in ip_record collection as processed data it was empty"
         )
     if len(processed_insert_data["file"]) > 0:
         db["file"].insert_many(processed_insert_data["file"], ordered=False)
