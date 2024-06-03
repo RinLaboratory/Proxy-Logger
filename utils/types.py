@@ -21,6 +21,7 @@ class TypesMongoPlayer(TypedDict):
 
 class TypesMongoIpAddress(TypedDict):
     ip: str
+    country: str
     subplayername: str
 
 
@@ -43,8 +44,14 @@ class TypesLoadedData(TypedDict):
 class TypesInsertedData(TypedDict):
     player: list[TypesMongoPlayer]
     ip_address: list[TypesMongoIpAddress]
+    ip_record: list[TypesMongoIpAddress]
     file: list[TypesMongoFile]
     activity: list[TypesMongoActivity]
     latest_file: list[TypesMongoFile]
     latest_activity: list[TypesMongoActivity]
     file_marked_for_deletion: list[ObjectId]
+
+
+class TypesCountryDictionary(TypedDict):
+    spanish: dict[str, dict[str, tuple[str, str]]]
+    english: dict[str, dict[str, tuple[str, str]]]
