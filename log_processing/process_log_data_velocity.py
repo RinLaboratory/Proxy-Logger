@@ -44,7 +44,12 @@ def PROCESS_LOG_DATA_VELOCITY(
                     or ("VPN o Proxy" in line)
                 ):
                     insert_data["ip_address"].append(
-                        {"ip": ip, "subplayername": inserted_playername, "isVPN": True}
+                        {
+                            "ip": ip,
+                            "subplayername": inserted_playername,
+                            "isVPN": True,
+                            "latest_activity": log_datetime,
+                        }
                     )
                     if "desde: " in line:
                         start_index = splited_line.index("desde:") + 1
@@ -70,7 +75,11 @@ def PROCESS_LOG_DATA_VELOCITY(
                         insert_data["ip_record"].append({"ip": ip, "country": country})
                 else:
                     insert_data["ip_address"].append(
-                        {"ip": ip, "subplayername": inserted_playername}
+                        {
+                            "ip": ip,
+                            "subplayername": inserted_playername,
+                            "latest_activity": log_datetime,
+                        }
                     )
 
             if log_filename != "latest.log":

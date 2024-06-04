@@ -60,7 +60,11 @@ def PROCESS_LOG_DATA_BUNGEECORD(
 
             if ip_isPresent is None:
                 insert_data["ip_address"].append(
-                    {"ip": ip, "subplayername": inserted_playername}
+                    {
+                        "ip": ip,
+                        "subplayername": inserted_playername,
+                        "latest_activity": log_datetime,
+                    }
                 )
 
             insert_data["activity"].append(
@@ -122,10 +126,17 @@ def PROCESS_LOG_DATA_BUNGEECORD(
                     # El jugador está presente desde antes
                     inserted_playername = playername_isPresent[0]
                 else:
+                    isPremium = False
+                    if "premium account" in line:
+                        isPremium = True
                     # El jugador no está presente y se debe ingresar en la db
                     inserted_playername = playername_lower
                     insert_data["player"].append(
-                        {"playername": playername, "subplayername": playername_lower}
+                        {
+                            "playername": playername,
+                            "subplayername": playername_lower,
+                            "isPremium": isPremium,
+                        }
                     )
 
                 insert_data["activity"].append(

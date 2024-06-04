@@ -64,6 +64,17 @@ def PROCESS_INSERT_DATA(
             is not None
         ):
             if processed_ip_addresses.get(unprocessed_ip_data["ip"]) is not None:
+                latest_ip_activity_before = (
+                    processed_ip_addresses_as_ip_and_subplayername[
+                        unprocessed_ip_data["ip"] + unprocessed_ip_data["subplayername"]
+                    ]["latest_activity"]
+                )
+                latest_ip_activity_after = unprocessed_ip_data["latest_activity"]
+                latest_ip_activity = None
+                if latest_ip_activity_after > latest_ip_activity_before:
+                    latest_ip_activity = latest_ip_activity_after
+                else:
+                    latest_ip_activity = latest_ip_activity_before
                 processed_ip_addresses_as_ip_and_subplayername[
                     unprocessed_ip_data["ip"] + unprocessed_ip_data["subplayername"]
                 ] = {
@@ -75,8 +86,10 @@ def PROCESS_INSERT_DATA(
                     "country": processed_ip_addresses[unprocessed_ip_data["ip"]][
                         "country"
                     ],
+                    "latest_activity": latest_ip_activity,
                 }
             else:
+                latest_ip_activity = unprocessed_ip_data["latest_activity"]
                 country = IP_TO_COUNTRY(unprocessed_ip_data["ip"], db)
                 processed_ip_addresses[unprocessed_ip_data["ip"]] = {
                     "ip": unprocessed_ip_data["ip"],
@@ -92,9 +105,11 @@ def PROCESS_INSERT_DATA(
                     **unprocessed_ip_data,
                     "_id": ObjectId(),
                     "country": country,
+                    "latest_activity": latest_ip_activity,
                 }
         else:
             if processed_ip_addresses.get(unprocessed_ip_data["ip"]) is not None:
+                latest_ip_activity = unprocessed_ip_data["latest_activity"]
                 processed_ip_addresses_as_ip_and_subplayername[
                     unprocessed_ip_data["ip"] + unprocessed_ip_data["subplayername"]
                 ] = {
@@ -103,8 +118,10 @@ def PROCESS_INSERT_DATA(
                     "country": processed_ip_addresses[unprocessed_ip_data["ip"]][
                         "country"
                     ],
+                    "latest_activity": latest_ip_activity,
                 }
             else:
+                latest_ip_activity = unprocessed_ip_data["latest_activity"]
                 country = IP_TO_COUNTRY(unprocessed_ip_data["ip"], db)
                 processed_ip_addresses[unprocessed_ip_data["ip"]] = {
                     "ip": unprocessed_ip_data["ip"],
@@ -117,6 +134,7 @@ def PROCESS_INSERT_DATA(
                     **unprocessed_ip_data,
                     "_id": ObjectId(),
                     "country": country,
+                    "latest_activity": latest_ip_activity,
                 }
 
     print("starting activity...")
