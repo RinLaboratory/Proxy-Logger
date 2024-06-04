@@ -17,12 +17,15 @@ class TypesMongoFile(TypedDict):
 class TypesMongoPlayer(TypedDict):
     playername: str
     subplayername: str
+    isPremium: bool
 
 
 class TypesMongoIpAddress(TypedDict):
     ip: str
     country: str
     subplayername: str
+    latest_activity: datetime
+    isVPN: bool
 
 
 class TypesMongoActivity(TypedDict):
