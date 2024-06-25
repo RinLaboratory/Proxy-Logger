@@ -62,18 +62,18 @@ Use `python logger.py` to run the app.
 
 Velocity logs look like this:
 ```
-[18:21:38] [Netty epoll Worker #18/INFO] [com.velocitypowered.proxy.connection.client.AuthSessionHandler]: [connected player] TheCreeperZenior (/127.0.0.1:69420) has connected
-[18:22:05] [Netty epoll Worker #18/INFO] [com.velocitypowered.proxy.connection.MinecraftConnection]: [server connection] TheCreeperZenior -> lobby has connected
-[18:24:50] [Netty epoll Worker #18/INFO] [com.velocitypowered.proxy.connection.MinecraftConnection]: [connected player] TheCreeperZenior (127.0.0.1/127.0.0.1:69420) has disconnected
-[18:24:50] [Netty epoll Worker #18/INFO] [com.velocitypowered.proxy.connection.MinecraftConnection]: [server connection] TheCreeperZenior -> lobby has disconnected
+[18:21:38] [Netty epoll Worker #18/INFO] [com.velocitypowered.proxy.connection.client.AuthSessionHandler]: [connected player] RinLaboratory (/127.0.0.1:69420) has connected
+[18:22:05] [Netty epoll Worker #18/INFO] [com.velocitypowered.proxy.connection.MinecraftConnection]: [server connection] RinLaboratory -> lobby has connected
+[18:24:50] [Netty epoll Worker #18/INFO] [com.velocitypowered.proxy.connection.MinecraftConnection]: [connected player] RinLaboratory (127.0.0.1/127.0.0.1:69420) has disconnected
+[18:24:50] [Netty epoll Worker #18/INFO] [com.velocitypowered.proxy.connection.MinecraftConnection]: [server connection] RinLaboratory -> lobby has disconnected
 ```
 
 ### From Bungeecord:
 
 Bungeecord logs look like this:
 ```
-[18:21:38] [Netty Worker IO Thread #2/INFO]: [TheCreeperZenior|/127.0.0.1:69420] <-> ServerConnector [auth] has connected
-[18:22:05] [Netty Worker IO Thread #2/INFO]: [/127.0.0.1:69420|TheCreeperZenior] <-> DownstreamBridge <-> [auth] has disconnected
-[18:24:50] [Netty Worker IO Thread #1/INFO]: [/127.0.0.1:69420|TheCreeperZenior] <-> DownstreamBridge <-> [lobby] has disconnected
-[18:24:50] [Netty Worker IO Thread #10/INFO]: [/127.0.0.1:69420|TheCreeperZenior] -> UpstreamBridge has disconnected
+[18:21:38] [Netty Worker IO Thread #2/INFO]: [RinLaboratory|/127.0.0.1:69420] <-> ServerConnector [auth] has connected
+[18:22:05] [Netty Worker IO Thread #2/INFO]: [/127.0.0.1:69420|RinLaboratory] <-> DownstreamBridge <-> [auth] has disconnected
+[18:24:50] [Netty Worker IO Thread #1/INFO]: [/127.0.0.1:69420|RinLaboratory] <-> DownstreamBridge <-> [lobby] has disconnected
+[18:24:50] [Netty Worker IO Thread #10/INFO]: [/127.0.0.1:69420|RinLaboratory] -> UpstreamBridge has disconnected
 ```
